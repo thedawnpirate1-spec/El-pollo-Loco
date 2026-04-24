@@ -3,6 +3,7 @@ const level1 = new level(
         new chicken(),
         new chicken(),
         new chicken(),
+        new Endboss(),
     ],
     [
         new cloud(),
