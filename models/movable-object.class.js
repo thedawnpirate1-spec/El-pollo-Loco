@@ -57,10 +57,23 @@ class MovableObject{
     }
     // isColliding(chicken)
     isColliding(mo){
-        return this.x +this.width> mo.x&&
-        this.y+ this.height > mo.y&&
-        this.x < mo.x &&
+        return this.x + this.width > mo.x &&
+        this.y + this.height > mo.y &&
+        this.x < mo.x + mo.width &&
         this.y < mo.y + mo.height;
+    }
+
+    lastHit = 0;
+
+    hit(){
+        this.energy -= 5;
+        if(this.energy < 0){
+            this.energy = 0;
+        }
+    }
+
+    isDead(){
+        return this.energy == 0;
     }
 
     moveRight(){
