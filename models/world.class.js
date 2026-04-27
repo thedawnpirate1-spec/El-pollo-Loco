@@ -6,6 +6,7 @@ class World {
     keyboard;
     camera_x = 0;
     statusBar = new StatusBar();
+    throwableObjects = [];
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -23,7 +24,11 @@ class World {
     setWorld(){
         this.character.world = this;
     }
-
+    run(){
+        setInterval(() => {
+            this.checkCollisions();
+        }, 200);
+    }
     checkCollisions(){
         setInterval(() => {
                 this.level.enemies.forEach((enemy)=> {
