@@ -14,16 +14,26 @@ class World {
         this.enemies = level1.enemies;
         this.clouds = level1.clouds;
         this.backgroundObjects = level1.backgroundObjects;
-        this.setWorld();
         this.draw();
+        this.setWorld();
+        this.checkCollisions();
     }
 
     setWorld(){
         this.character.world = this;
-
     }
 
-
+    checkCollisions(){
+        setInterval(() => {
+                this.level.enemies.forEach((enemy)=> {
+                    if (this.character.isColliding(enemy)) {
+                        this.character.energy -= 2;
+                        console.log('Collision with Character', this.character.energy);
+                    }
+                });
+        }, 200);
+    }
+    
     draw(){
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -49,12 +59,38 @@ class World {
 
     addToMap(mo){
         if(mo.otherDirection){
-            this.ctx.save();
-            this.ctx.scale(-1, 1);
-            this.ctx.drawImage(mo.img, -mo.x - mo.width, mo.y, mo.width, mo.height);
-            this.ctx.restore();
-        } else {
-            this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
+            this.flipImage(mo);
+        } 
+        mo.draw(this.ctx);
+        mo.drawFrame(this.ctx);
+
+        if(mo.otherDirection){
+            this.flipImageBack(mo);
         }
     };
+
+    flipImageBack(mo){
+        mo.x = mo.x * -1;
+        this.ctx.restore();
+    }
+
+    flipImage(mo){
+    this.ctx.save();
+    this.ctx.translate(mo.width, 0);
+    this.ctx.scale(-1, 1);
+    mo.x = mo.x * -1;
+    }
+
+//   if(character.x + character.width > chicken.x && 
+//     character.y + character.height > chicken.y &&
+//     character.x < chicken.x &&
+//     character.y < chicken.y + chicken.height
+//   )
+
+//   isCollsion(mo){
+//     return this.x + this.width > mo.x &&
+//     this.y + this.height > mo.y && 
+//     this.x < mo.x && 
+//     this.y < mo.y + mo.height;
+//   }
 }
