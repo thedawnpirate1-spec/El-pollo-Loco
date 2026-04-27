@@ -19,16 +19,7 @@ class MovableObject extends DrawableObject{
         return this.y <180;
     };
 
-    drawFrame(ctx){
-        if(this instanceof Character || this instanceof Chicken || this instanceof Endboss){
-        ctx.beginPath();
-        ctx.lineWidth = "5";
-        ctx.strokeStyle = "blue";
-        ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.stroke();
-        }
-        
-    }
+    
     // isColliding(chicken)
     isColliding(mo){
         return this.x + this.width > mo.x &&
@@ -48,7 +39,6 @@ class MovableObject extends DrawableObject{
     isHurt(){
         let timepassed = new Date().getTime() - this.lastHit; // Time in ms
         timepassed = timepassed / 1000; // Time in s
-        console.log(timepassed);
         return timepassed < 1; // 1 second hurt status
     }
     isDead(){
