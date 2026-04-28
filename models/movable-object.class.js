@@ -26,10 +26,10 @@ class MovableObject extends DrawableObject{
     
     // isColliding(chicken)
     isColliding(mo){
-        return this.x + this.width > mo.x &&
-        this.y + this.height > mo.y &&
-        this.x < mo.x + mo.width &&
-        this.y < mo.y + mo.height;
+        return this.x + this.width - this.offset.right > mo.x + mo.offset.left &&
+        this.y + this.height - this.offset.bottom > mo.y + mo.offset.top &&
+        this.x + this.offset.left < mo.x + mo.width - mo.offset.right &&
+        this.y + this.offset.top < mo.y + mo.height - mo.offset.bottom;
     }
 
     hit(){
@@ -43,7 +43,7 @@ class MovableObject extends DrawableObject{
     isHurt(){
         let timepassed = new Date().getTime() - this.lastHit; // Time in ms
         timepassed = timepassed / 1000; // Time in s
-        return timepassed < 1; // 1 second hurt status
+        return timepassed < 0.5; // 0.5 second hurt status
     }
     isDead(){
         return this.energy == 0;

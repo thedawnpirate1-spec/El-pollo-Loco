@@ -39,6 +39,14 @@ class Character extends MovableObject{
     world;
     currentImage = 0;
     speed = 10;
+    coins = 0;
+
+    collectCoin() {
+        this.coins += 20;
+        if (this.coins > 100) {
+            this.coins = 100;
+        }
+    }
 
     constructor(){
         super();
