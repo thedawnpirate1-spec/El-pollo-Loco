@@ -31,7 +31,17 @@ class World {
         setInterval(() => {
             this.checkCollisions();
             this.checkThrowObjects();
+            this.checkEndboss();
         }, 200);
+    }
+    
+    checkEndboss() {
+        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        if(endboss && !endboss.hadFirstContact) {
+            if (this.character.x > 2000) {
+                endboss.hadFirstContact = true;
+            }
+        }
     }
     checkThrowObjects() {
         if(this.keyboard.D){
@@ -54,25 +64,49 @@ class World {
 
         this.level.bottles.forEach((bottle, index) => {
             if (this.character.isColliding(bottle)) {
-                this.character.collectBottle();
-                this.bottleBar.setPercentage(this.character.bottles);
-                this.level.bottles.splice(index, 1);
+                if(this.character.bottles < 100) {
+                    this.character.collectBottle();
+                    this.bottleBar.setPercentage(this.character.bottles);
+                    this.level.bottles.splice(index, 1);
+                }
             }
         });
 
-        this.level.enemies.forEach((enemy) => {
+        this.level.enemies.forEach((enemy, index) => {
             if (this.character.isColliding(enemy)) {
-                this.character.hit();
-                this.statusBar.setPercentage(this.character.energy);
+                if (enemy instanceof Endboss) {
+                    if (!enemy.isDead()) {
+                        this.character.hit();
+                        this.statusBar.setPercentage(this.character.energy);
+                    }
+                } else if (this.character.isAboveGround() && this.character.speedY < 0 && !enemy.isDead()) {
+                    // Jump on chicken to kill
+                    enemy.energy = 0; 
+                    this.character.jump(); // bounce off
+                    setTimeout(() => {
+                        let i = this.level.enemies.indexOf(enemy);
+                        if (i > -1) this.level.enemies.splice(i, 1);
+                    }, 1000);
+                } else if (!enemy.isDead()) {
+                    this.character.hit();
+                    this.statusBar.setPercentage(this.character.energy);
+                }
             }
         });
 
         this.throwableObjects.forEach((bottle) => {
             this.level.enemies.forEach((enemy, index) => {
-                if (bottle.isColliding(enemy)) {
+                if (bottle.isColliding(enemy) && !enemy.isDead()) {
                     // Enemy hit! We could remove the enemy and the bottle
                     enemy.energy = 0; // Enemy dies
-                    this.level.enemies.splice(index, 1); // Remove enemy from game
+                    
+                    // Only remove standard enemies from array after 1 second
+                    if (!(enemy instanceof Endboss)) {
+                        setTimeout(() => {
+                            let i = this.level.enemies.indexOf(enemy);
+                            if (i > -1) this.level.enemies.splice(i, 1);
+                        }, 1000);
+                    }
                 }
             });
         });
