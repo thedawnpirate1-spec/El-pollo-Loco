@@ -40,11 +40,19 @@ class Character extends MovableObject{
     currentImage = 0;
     speed = 10;
     coins = 0;
+    bottles = 0;
 
     collectCoin() {
         this.coins += 20;
         if (this.coins > 100) {
             this.coins = 100;
+        }
+    }
+
+    collectBottle() {
+        this.bottles += 20;
+        if (this.bottles > 100) {
+            this.bottles = 100;
         }
     }
 
