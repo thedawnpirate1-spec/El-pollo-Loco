@@ -10,6 +10,8 @@ class World {
     bottleBar = new BottleBar();
     throwableObjects = [];
 
+    isGameOver = false;
+
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
@@ -32,7 +34,27 @@ class World {
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkEndboss();
-        }, 200);
+            this.checkGameStatus();
+        }, 50); // Increased frequency for accurate collisions
+    }
+    
+    checkGameStatus() {
+        if (this.isGameOver) return;
+        
+        if (this.character.isDead()) {
+            this.isGameOver = true;
+            setTimeout(() => {
+                if(typeof gameOver === 'function') gameOver();
+            }, 1000); // Wait 1 sec for death animation
+        }
+        
+        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        if (endboss && endboss.isDead()) {
+            this.isGameOver = true;
+            setTimeout(() => {
+                if(typeof winGame === 'function') winGame();
+            }, 1000);
+        }
     }
     
     checkEndboss() {
@@ -50,6 +72,7 @@ class World {
                 this.throwableObjects.push(bottle);
                 this.character.bottles -= 20;
                 this.bottleBar.setPercentage(this.character.bottles);
+                this.keyboard.D = false; // Prevent machine-gun throwing
             }
         }
     }

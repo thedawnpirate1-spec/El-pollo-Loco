@@ -1,11 +1,37 @@
 let canvas;
 let world;
 let keyboard = new KeyBoard();
+
 function init(){
     canvas = document.getElementById('canvas');
-    world = new World(canvas, keyboard);
+}
 
-    console.log('My Character is', world.character);
+function startGame() {
+    document.getElementById('startScreen').classList.add('d-none');
+    document.getElementById('gameOverScreen').classList.add('d-none');
+    document.getElementById('winScreen').classList.add('d-none');
+    
+    initLevel(); // Erstellt das Level neu
+    world = new World(canvas, keyboard);
+}
+
+function gameOver() {
+    document.getElementById('gameOverScreen').classList.remove('d-none');
+    clearAllIntervals();
+}
+
+function winGame() {
+    document.getElementById('winScreen').classList.remove('d-none');
+    clearAllIntervals();
+}
+
+function restartGame() {
+    clearAllIntervals();
+    startGame();
+}
+
+function clearAllIntervals() {
+    for (let i = 1; i < 9999; i++) window.clearInterval(i);
 }
 
 window.addEventListener('keydown', (event) =>{

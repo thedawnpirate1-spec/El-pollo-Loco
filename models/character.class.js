@@ -56,6 +56,19 @@ class Character extends MovableObject{
         }
     }
 
+    IMAGES_IDLE = [
+        'img/2_character_pepe/1_idle/idle/I-1.png',
+        'img/2_character_pepe/1_idle/idle/I-2.png',
+        'img/2_character_pepe/1_idle/idle/I-3.png',
+        'img/2_character_pepe/1_idle/idle/I-4.png',
+        'img/2_character_pepe/1_idle/idle/I-5.png',
+        'img/2_character_pepe/1_idle/idle/I-6.png',
+        'img/2_character_pepe/1_idle/idle/I-7.png',
+        'img/2_character_pepe/1_idle/idle/I-8.png',
+        'img/2_character_pepe/1_idle/idle/I-9.png',
+        'img/2_character_pepe/1_idle/idle/I-10.png'
+    ];
+
     constructor(){
         super();
         this.loadImage('img/2_character_pepe/2_walk/W-21.png');
@@ -63,12 +76,13 @@ class Character extends MovableObject{
         this.loadImages(this.IMAGES_JUMPING);
         this.loadImages(this.IMAGES_DEAD);
         this.loadImages(this.IMAGES_HURT);
+        this.loadImages(this.IMAGES_IDLE);
         this.applyGravity();
         this.animate();
     }
     animate(){
         setInterval(() => {
-            if (this.world && this.world.keyboard) {
+            if (this.world && this.world.keyboard && !this.isDead()) {
                 if(this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x){
                     this.otherDirection = false;
                     this.moveRight();
@@ -87,14 +101,26 @@ class Character extends MovableObject{
 
         setInterval(() => {
             if (this.isDead()){
-                this.playAnimation(this.IMAGES_DEAD);
+                if(!this.deadAnimationStarted) {
+                    this.deadAnimationIndex = 0;
+                    this.deadAnimationStarted = true;
+                }
+                if (this.deadAnimationIndex < this.IMAGES_DEAD.length * 4) { // Slow down: 4 ticks per frame (200ms)
+                    let frame = Math.floor(this.deadAnimationIndex / 4);
+                    this.img = this.imageCache[this.IMAGES_DEAD[frame]];
+                    this.deadAnimationIndex++;
+                } else {
+                    this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
+                }
             }else if(this.isHurt()){
                 this.playAnimation(this.IMAGES_HURT);
             } else if (this.isAboveGround()){
                 this.playAnimation(this.IMAGES_JUMPING);
             } else {
-                if(this.world.keyboard.RIGHT || this.world.keyboard.LEFT){
-                this.playAnimation(this.IMAGES_WALKING);
+                if(this.world && this.world.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)){
+                    this.playAnimation(this.IMAGES_WALKING);
+                } else {
+                    this.playAnimation(this.IMAGES_IDLE);
                 }
             }
         }, 50);
