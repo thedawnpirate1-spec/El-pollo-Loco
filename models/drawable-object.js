@@ -20,8 +20,8 @@ offset = {
     drawFrame(ctx){
         if(this instanceof Character || this instanceof Chicken || this instanceof Endboss || this.constructor.name === 'Coin'){
             ctx.beginPath();
-            ctx.lineWidth = "5";
-            ctx.strokeStyle = "blue";
+            ctx.lineWidth = "5"; 
+            ctx.strokeStyle = "transparent"; 
             ctx.rect(
                 this.x + this.offset.left,
                 this.y + this.offset.top,

@@ -50,7 +50,11 @@ function initLevel() {
         new Coin(450, 150),
         new Coin(600, 200),
         new Coin(900, 100),
-        new Coin(1200, 150)
+        new Coin(1200, 150),
+        new Coin(1500, 200),
+        new Coin(1800, 150),
+        new Coin(2100, 100),
+        new Coin(2400, 200)
     ],
     [
         new Bottle(200, 360),

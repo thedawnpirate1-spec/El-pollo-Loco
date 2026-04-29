@@ -68,8 +68,22 @@ class Character extends MovableObject{
         'img/2_character_pepe/1_idle/idle/I-9.png',
         'img/2_character_pepe/1_idle/idle/I-10.png'
     ];
+    IMAGES_SLEEP = [
+        'img/2_character_pepe/1_idle/long_idle/I-11.png',
+        'img/2_character_pepe/1_idle/long_idle/I-12.png',
+        'img/2_character_pepe/1_idle/long_idle/I-13.png',
+        'img/2_character_pepe/1_idle/long_idle/I-14.png',
+        'img/2_character_pepe/1_idle/long_idle/I-15.png',
+        'img/2_character_pepe/1_idle/long_idle/I-16.png',
+        'img/2_character_pepe/1_idle/long_idle/I-17.png',
+        'img/2_character_pepe/1_idle/long_idle/I-18.png',
+        'img/2_character_pepe/1_idle/long_idle/I-19.png',
+        'img/2_character_pepe/1_idle/long_idle/I-20.png'
+    ];
 
-    constructor(){
+    lastActionTime = 0;
+
+    constructor() {
         super();
         this.loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadImages(this.IMAGES_WALKING);
@@ -77,53 +91,86 @@ class Character extends MovableObject{
         this.loadImages(this.IMAGES_DEAD);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_IDLE);
+        this.loadImages(this.IMAGES_SLEEP);
         this.applyGravity();
+        this.lastActionTime = new Date().getTime();
         this.animate();
     }
-    animate(){
-        setInterval(() => {
-            if (this.world && this.world.keyboard && !this.isDead()) {
-                if(this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x){
-                    this.otherDirection = false;
-                    this.moveRight();
-                }
-                if(this.world.keyboard.LEFT && this.x > 0){
-                    this.moveLeft();
-                    this.otherDirection = true;
-                }
-                this.world.camera_x = -this.x +100;
 
-                if(this.world.keyboard.SPACE && !this.isAboveGround()){
-                    this.jump();
-                }
-            }
-        }, 1000/60);
+    /** Starts character animation intervals */
+    animate() {
+        setInterval(() => this.handleMovement(), 1000 / 60);
+        setInterval(() => this.handleStateAnimations(), 50);
+    }
 
-        setInterval(() => {
-            if (this.isDead()){
-                if(!this.deadAnimationStarted) {
-                    this.deadAnimationIndex = 0;
-                    this.deadAnimationStarted = true;
-                }
-                if (this.deadAnimationIndex < this.IMAGES_DEAD.length * 4) { // Slow down: 4 ticks per frame (200ms)
-                    let frame = Math.floor(this.deadAnimationIndex / 4);
-                    this.img = this.imageCache[this.IMAGES_DEAD[frame]];
-                    this.deadAnimationIndex++;
-                } else {
-                    this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
-                }
-            }else if(this.isHurt()){
-                this.playAnimation(this.IMAGES_HURT);
-            } else if (this.isAboveGround()){
-                this.playAnimation(this.IMAGES_JUMPING);
-            } else {
-                if(this.world && this.world.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)){
-                    this.playAnimation(this.IMAGES_WALKING);
-                } else {
-                    this.playAnimation(this.IMAGES_IDLE);
-                }
-            }
-        }, 50);
+    /** Handles movement and jump based on inputs */
+    handleMovement() {
+        if (!this.world || !this.world.keyboard || this.isDead()) return;
+        if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) this.moveCharRight();
+        if (this.world.keyboard.LEFT && this.x > 0) this.moveCharLeft();
+        if (this.world.keyboard.SPACE && !this.isAboveGround()) this.jump();
+        this.world.camera_x = -this.x + 100;
+        this.checkActivity();
+    }
+
+    /** Moves right and updates direction */
+    moveCharRight() {
+        this.otherDirection = false;
+        this.moveRight();
+    }
+
+    /** Moves left and updates direction */
+    moveCharLeft() {
+        this.moveLeft();
+        this.otherDirection = true;
+    }
+
+    /** Updates action time if activity keys are pressed */
+    checkActivity() {
+        let kb = this.world.keyboard;
+        if (kb.RIGHT || kb.LEFT || kb.SPACE || kb.D) {
+            this.lastActionTime = new Date().getTime();
+        }
+    }
+
+    /** Manages visual state animations based on current character state */
+    handleStateAnimations() {
+        if (this.isDead()) this.playDeadAnimation();
+        else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
+        else if (this.isAboveGround()) this.playAnimation(this.IMAGES_JUMPING);
+        else this.handleGroundAnimations();
+    }
+
+    /** Determines which animation to play while on the ground */
+    handleGroundAnimations() {
+        let kb = this.world.keyboard;
+        if (kb && (kb.RIGHT || kb.LEFT)) this.playAnimation(this.IMAGES_WALKING);
+        else this.handleIdleAnimations();
+    }
+
+    /** Toggles between idle and sleep animation */
+    handleIdleAnimations() {
+        let timePassed = new Date().getTime() - this.lastActionTime;
+        if (timePassed > 15000) {
+            this.playAnimation(this.IMAGES_SLEEP);
+        } else {
+            this.playAnimation(this.IMAGES_IDLE);
+        }
+    }
+
+    /** Plays the dead animation sequence */
+    playDeadAnimation() {
+        if(!this.deadAnimationStarted) {
+            this.deadAnimationIndex = 0;
+            this.deadAnimationStarted = true;
+        }
+        if (this.deadAnimationIndex < this.IMAGES_DEAD.length * 4) {
+            let frame = Math.floor(this.deadAnimationIndex / 4);
+            this.img = this.imageCache[this.IMAGES_DEAD[frame]];
+            this.deadAnimationIndex++;
+        } else {
+            this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
+        }
     }
 
     offset = {
