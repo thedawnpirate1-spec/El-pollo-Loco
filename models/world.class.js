@@ -48,7 +48,7 @@ class World {
             }, 1000); // Wait 1 sec for death animation
         }
         
-        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        let endboss = this.level.enemies.find(function(e) { return e instanceof Endboss; });
         if (endboss && endboss.isDead()) {
             this.isGameOver = true;
             setTimeout(() => {
@@ -58,7 +58,7 @@ class World {
     }
     
     checkEndboss() {
-        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        let endboss = this.level.enemies.find(function(e) { return e instanceof Endboss; });
         if(endboss && !endboss.hadFirstContact) {
             if (this.character.x > 2000) {
                 endboss.hadFirstContact = true;
@@ -77,15 +77,15 @@ class World {
         }
     }
     checkCollisions() {
-        this.level.coins.forEach((coin, index) => {
+        this.level.coins.forEach(function(coin, index) {
             if (this.character.isColliding(coin)) {
                 this.character.collectCoin();
                 this.coinBar.setPercentage(this.character.coins);
                 this.level.coins.splice(index, 1);
             }
-        });
+        }.bind(this));
 
-        this.level.bottles.forEach((bottle, index) => {
+        this.level.bottles.forEach(function(bottle, index) {
             if (this.character.isColliding(bottle)) {
                 if(this.character.bottles < 100) {
                     this.character.collectBottle();
@@ -93,9 +93,9 @@ class World {
                     this.level.bottles.splice(index, 1);
                 }
             }
-        });
+        }.bind(this));
 
-        this.level.enemies.forEach((enemy, index) => {
+        this.level.enemies.forEach(function(enemy, index) {
             if (this.character.isColliding(enemy)) {
                 if (enemy instanceof Endboss) {
                     if (!enemy.isDead()) {
@@ -115,10 +115,10 @@ class World {
                     this.statusBar.setPercentage(this.character.energy);
                 }
             }
-        });
+        }.bind(this));
 
-        this.throwableObjects.forEach((bottle) => {
-            this.level.enemies.forEach((enemy, index) => {
+        this.throwableObjects.forEach(function(bottle) {
+            this.level.enemies.forEach(function(enemy, index) {
                 if (bottle.isColliding(enemy) && !enemy.isDead()) {
                     // Enemy hit! We could remove the enemy and the bottle
                     enemy.energy = 0; // Enemy dies
@@ -131,8 +131,8 @@ class World {
                         }, 1000);
                     }
                 }
-            });
-        });
+            }.bind(this));
+        }.bind(this));
     }
 
     draw(){
@@ -163,9 +163,9 @@ class World {
     };
 
     addObjectsToMap(objects){
-        objects.forEach(object => {
+        objects.forEach(function(object) {
             this.addToMap(object);
-        });
+        }.bind(this));
     };
 
     addToMap(mo){

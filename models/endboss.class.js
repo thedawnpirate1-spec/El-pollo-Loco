@@ -1,55 +1,89 @@
-class Endboss extends MovableObject{
+class Endboss extends MovableObject {
     height = 340;
     width = 270;
-    
-    IMAGES_ALERT = [
-    'img/4_enemie_boss_chicken/2_alert/G5.png',
-    'img/4_enemie_boss_chicken/2_alert/G6.png',
-    'img/4_enemie_boss_chicken/2_alert/G7.png',
-    'img/4_enemie_boss_chicken/2_alert/G8.png',
-    'img/4_enemie_boss_chicken/2_alert/G9.png',
-    'img/4_enemie_boss_chicken/2_alert/G10.png',
-    'img/4_enemie_boss_chicken/2_alert/G11.png',
-    'img/4_enemie_boss_chicken/2_alert/G12.png',
-    ];
+    y = 100;
+    speed = 1.5;
+
     IMAGES_WALKING = [
-    'img/4_enemie_boss_chicken/1_walk/G1.png',
-    'img/4_enemie_boss_chicken/1_walk/G2.png',
-    'img/4_enemie_boss_chicken/1_walk/G3.png',
-    'img/4_enemie_boss_chicken/1_walk/G4.png'
+        'img/4_enemie_boss_chicken/1_walk/G1.png',
+        'img/4_enemie_boss_chicken/1_walk/G2.png',
+        'img/4_enemie_boss_chicken/1_walk/G3.png',
+        'img/4_enemie_boss_chicken/1_walk/G4.png'
     ];
-    offset = {
-        top: 20,
-        bottom: 20,
-        left: 20,
-        right: 20
-    };
+
+    IMAGES_ALERT = [
+        'img/4_enemie_boss_chicken/2_alert/G5.png',
+        'img/4_enemie_boss_chicken/2_alert/G6.png',
+        'img/4_enemie_boss_chicken/2_alert/G7.png',
+        'img/4_enemie_boss_chicken/2_alert/G8.png',
+        'img/4_enemie_boss_chicken/2_alert/G9.png',
+        'img/4_enemie_boss_chicken/2_alert/G10.png',
+        'img/4_enemie_boss_chicken/2_alert/G11.png',
+        'img/4_enemie_boss_chicken/2_alert/G12.png',
+    ];
+
+    IMAGES_ATTACK = [
+        'img/4_enemie_boss_chicken/3_attack/G13.png',
+        'img/4_enemie_boss_chicken/3_attack/G14.png',
+        'img/4_enemie_boss_chicken/3_attack/G15.png',
+        'img/4_enemie_boss_chicken/3_attack/G16.png',
+        'img/4_enemie_boss_chicken/3_attack/G17.png',
+        'img/4_enemie_boss_chicken/3_attack/G18.png',
+        'img/4_enemie_boss_chicken/3_attack/G19.png',
+        'img/4_enemie_boss_chicken/3_attack/G20.png'
+    ];
+
+    IMAGES_HURT = [
+        'img/4_enemie_boss_chicken/4_hurt/G21.png',
+        'img/4_enemie_boss_chicken/4_hurt/G22.png',
+        'img/4_enemie_boss_chicken/4_hurt/G23.png'
+    ];
+
+    IMAGES_DEAD = [
+        'img/4_enemie_boss_chicken/5_dead/G24.png',
+        'img/4_enemie_boss_chicken/5_dead/G25.png',
+        'img/4_enemie_boss_chicken/5_dead/G26.png'
+    ];
+
+    offset = { top: 20, bottom: 20, left: 20, right: 20 };
     hadFirstContact = false;
 
-    constructor(){
+    constructor() {
         super();
         this.loadImage(this.IMAGES_ALERT[0]);
-        this.loadImages(this.IMAGES_ALERT);
         this.loadImages(this.IMAGES_WALKING);
-        this.x = 2500; 
-        this.y = 100;
-        this.speed = 1.5;
+        this.loadImages(this.IMAGES_ALERT);
+        this.loadImages(this.IMAGES_ATTACK);
+        this.loadImages(this.IMAGES_HURT);
+        this.loadImages(this.IMAGES_DEAD);
+        this.x = 2500;
         this.animate();
     }
-    animate(){
-        setInterval(() => {
-            if(this.hadFirstContact){
-                this.moveLeft();
-                this.otherDirection = false;
-            }
-        }, 1000/60);
 
-        setInterval(() => {
-            if(this.hadFirstContact){
-                this.playAnimation(this.IMAGES_WALKING);
-            } else {
-                this.playAnimation(this.IMAGES_ALERT);
-            }
-        }, 200);
+    /** Starts the endboss animation and movement intervals */
+    animate() {
+        setInterval(() => this.handleMovement(), 1000 / 60);
+        setInterval(() => this.handleAnimations(), 200);
+    }
+
+    /** Handles the horizontal movement of the endboss */
+    handleMovement() {
+        if (this.hadFirstContact && !this.isDead()) {
+            this.moveLeft();
+            this.otherDirection = false;
+        }
+    }
+
+    /** Manages the visual state animations of the endboss */
+    handleAnimations() {
+        if (this.isDead()) {
+            this.playAnimation(this.IMAGES_DEAD);
+        } else if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+        } else if (this.hadFirstContact) {
+            this.playAnimation(this.IMAGES_WALKING);
+        } else {
+            this.playAnimation(this.IMAGES_ALERT);
+        }
     }
 }
