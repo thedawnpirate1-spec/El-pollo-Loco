@@ -118,18 +118,22 @@ class World {
         }.bind(this));
 
         this.throwableObjects.forEach(function(bottle) {
-            this.level.enemies.forEach(function(enemy, index) {
-                if (bottle.isColliding(enemy) && !enemy.isDead()) {
-                    // Enemy hit! We could remove the enemy and the bottle
-                    enemy.energy = 0; // Enemy dies
+            this.level.enemies.forEach(function(enemy) {
+                if (!bottle.hasSplashed && bottle.isColliding(enemy) && !enemy.isDead()) {
+                    bottle.splash();
+                    enemy.hit();
                     
-                    // Only remove standard enemies from array after 1 second
                     if (!(enemy instanceof Endboss)) {
                         setTimeout(() => {
                             let i = this.level.enemies.indexOf(enemy);
                             if (i > -1) this.level.enemies.splice(i, 1);
                         }, 1000);
                     }
+                    
+                    setTimeout(() => {
+                        let i = this.throwableObjects.indexOf(bottle);
+                        if (i > -1) this.throwableObjects.splice(i, 1);
+                    }, 300);
                 }
             }.bind(this));
         }.bind(this));
