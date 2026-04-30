@@ -64,11 +64,21 @@ class Endboss extends MovableObject {
     animate() {
         setInterval(() => this.handleMovement(), 1000 / 60);
         setInterval(() => this.handleAnimations(), 200);
+        
+        // Attack timer
+        setInterval(() => {
+            if (this.hadFirstContact && !this.isDead() && !this.isHurt()) {
+                this.isAttacking = true;
+                setTimeout(() => {
+                    this.isAttacking = false;
+                }, 1600); // 8 frames * 200ms = 1600ms
+            }
+        }, 4000); // Trigger attack every 4 seconds
     }
 
     /** Handles the horizontal movement of the endboss */
     handleMovement() {
-        if (this.hadFirstContact && !this.isDead()) {
+        if (this.hadFirstContact && !this.isDead() && !this.isAttacking) {
             this.moveLeft();
             this.otherDirection = false;
         }
@@ -77,13 +87,29 @@ class Endboss extends MovableObject {
     /** Manages the visual state animations of the endboss */
     handleAnimations() {
         if (this.isDead()) {
-            this.playAnimation(this.IMAGES_DEAD);
+            this.playDeadAnimation();
         } else if (this.isHurt()) {
             this.playAnimation(this.IMAGES_HURT);
+        } else if (this.isAttacking) {
+            this.playAnimation(this.IMAGES_ATTACK);
         } else if (this.hadFirstContact) {
             this.playAnimation(this.IMAGES_WALKING);
         } else {
             this.playAnimation(this.IMAGES_ALERT);
+        }
+    }
+
+    /** Plays the dead animation sequence only once */
+    playDeadAnimation() {
+        if (!this.deadAnimationStarted) {
+            this.deadAnimationIndex = 0;
+            this.deadAnimationStarted = true;
+        }
+        if (this.deadAnimationIndex < this.IMAGES_DEAD.length) {
+            this.img = this.imageCache[this.IMAGES_DEAD[this.deadAnimationIndex]];
+            this.deadAnimationIndex++;
+        } else {
+            this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
         }
     }
 }

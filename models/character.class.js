@@ -151,7 +151,7 @@ class Character extends MovableObject{
     /** Toggles between idle and sleep animation */
     handleIdleAnimations() {
         let timePassed = new Date().getTime() - this.lastActionTime;
-        if (timePassed > 15000) {
+        if (timePassed > 3000) {
             this.playAnimation(this.IMAGES_SLEEP);
         } else {
             this.playAnimation(this.IMAGES_IDLE);
