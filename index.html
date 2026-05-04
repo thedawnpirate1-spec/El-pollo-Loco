@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>El Pollo Loco</title>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
     <script defer src="models/drawable-object.js"></script>
     <script defer src="./models/movable-object.class.js"></script>
     <script defer src="./models/character.class.js"></script>
@@ -68,8 +69,42 @@
         </div>
 
         <div id="gameUI" class="d-none">
-            <div id="pauseBtn" onclick="togglePause()">
-                <div class="pause-icon"></div>
+            <div class="top-controls">
+                <div id="muteBtn" onclick="toggleMute()">
+                    <img src="img/volume.png" id="muteIcon" alt="Mute">
+                </div>
+                <div id="fullscreenBtn" onclick="toggleFullscreen()">
+                    <img src="img/fullscreen.png" alt="Fullscreen">
+                </div>
+                <div id="pauseBtn" onclick="togglePause()">
+                    <div class="pause-icon"></div>
+                </div>
+            </div>
+
+            <div class="mobile-controls">
+                <div class="mobile-controls-left">
+                    <div id="btnLeft" class="mobile-btn" onmousedown="mobileKeyPress('LEFT')" onmouseup="mobileKeyRelease('LEFT')" ontouchstart="mobileKeyPress('LEFT')" ontouchend="mobileKeyRelease('LEFT')">
+                        <img src="img/left_arrow.png" alt="Left">
+                    </div>
+                    <div id="btnRight" class="mobile-btn" onmousedown="mobileKeyPress('RIGHT')" onmouseup="mobileKeyRelease('RIGHT')" ontouchstart="mobileKeyPress('RIGHT')" ontouchend="mobileKeyRelease('RIGHT')">
+                        <img src="img/right_arrow.png" alt="Right">
+                    </div>
+                </div>
+                <div class="mobile-controls-right">
+                    <div id="btnJump" class="mobile-btn" onmousedown="mobileKeyPress('SPACE')" onmouseup="mobileKeyRelease('SPACE')" ontouchstart="mobileKeyPress('SPACE')" ontouchend="mobileKeyRelease('SPACE')">
+                        <img src="img/jump.png" alt="Jump">
+                    </div>
+                    <div id="btnThrow" class="mobile-btn" onmousedown="mobileKeyPress('D')" onmouseup="mobileKeyRelease('D')" ontouchstart="mobileKeyPress('D')" ontouchend="mobileKeyRelease('D')">
+                        <img src="img/throw.png" alt="Throw">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="turnDeviceOverlay" class="overlay d-none">
+            <div class="content">
+                <h2>Bitte drehe dein Gerät</h2>
+                <img src="img/turn_device.png" alt="Turn Device" style="width: 100px;">
             </div>
         </div>
     </div>

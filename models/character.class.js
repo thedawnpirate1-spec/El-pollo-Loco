@@ -98,7 +98,6 @@ class Character extends MovableObject{
         this.animate();
     }
 
-    /** Starts character animation intervals */
     animate() {
         setInterval(() => {
             if (gamePaused) return;
@@ -110,7 +109,6 @@ class Character extends MovableObject{
         }, 50);
     }
 
-    /** Handles movement and jump based on inputs */
     handleMovement() {
         if (!this.world || !this.world.keyboard || this.isDead()) return;
         if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) this.moveCharRight();
@@ -120,19 +118,16 @@ class Character extends MovableObject{
         this.checkActivity();
     }
 
-    /** Moves right and updates direction */
     moveCharRight() {
         this.otherDirection = false;
         this.moveRight();
     }
 
-    /** Moves left and updates direction */
     moveCharLeft() {
         this.moveLeft();
         this.otherDirection = true;
     }
 
-    /** Updates action time if activity keys are pressed */
     checkActivity() {
         let kb = this.world.keyboard;
         if (kb.RIGHT || kb.LEFT || kb.SPACE || kb.D) {
@@ -140,7 +135,6 @@ class Character extends MovableObject{
         }
     }
 
-    /** Manages visual state animations based on current character state */
     handleStateAnimations() {
         if (this.isDead()) this.playDeadAnimation();
         else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
@@ -148,14 +142,12 @@ class Character extends MovableObject{
         else this.handleGroundAnimations();
     }
 
-    /** Determines which animation to play while on the ground */
     handleGroundAnimations() {
         let kb = this.world.keyboard;
         if (kb && (kb.RIGHT || kb.LEFT)) this.playAnimation(this.IMAGES_WALKING);
         else this.handleIdleAnimations();
     }
 
-    /** Toggles between idle and sleep animation */
     handleIdleAnimations() {
         let timePassed = new Date().getTime() - this.lastActionTime;
         if (timePassed > 3000) {
@@ -165,7 +157,6 @@ class Character extends MovableObject{
         }
     }
 
-    /** Plays the dead animation sequence */
     playDeadAnimation() {
         if(!this.deadAnimationStarted) {
             this.deadAnimationIndex = 0;

@@ -18,20 +18,12 @@ class EndbossBar extends DrawableObject {
         this.setPercentage(100);
     }
 
-    /**
-     * Updates the bar image based on current percentage.
-     * @param {number} percentage - Percentage (0-100)
-     */
     setPercentage(percentage) {
         this.percentage = percentage;
         let imagePath = this.IMAGES[this.resolveImageIndex()];
         this.img = this.imageCache[imagePath];
     }
 
-    /**
-     * Resolves the image index based on percentage.
-     * @returns {number} Index of image array
-     */
     resolveImageIndex() {
         if (this.percentage >= 100) return 5;
         if (this.percentage >= 80) return 4;

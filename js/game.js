@@ -2,6 +2,7 @@ let canvas;
 let world;
 let keyboard = new KeyBoard();
 let gamePaused = false;
+let isMuted = false;
 
 const WIN_IMAGES = [
     'img/You won, you lost/You Win A.png',
@@ -23,36 +24,51 @@ const LOSE_IMAGES = [
 
 function init(){
     canvas = document.getElementById('canvas');
+    loadMuteState();
+}
+
+function loadMuteState() {
+    let muted = localStorage.getItem('isMuted');
+    if (muted === 'true') {
+        isMuted = true;
+        updateMuteUI();
+    }
 }
 
 function startGame() {
+    hideAllScreens();
+    document.getElementById('gameUI').classList.remove('d-none');
+    gamePaused = false;
+    initLevel(); 
+    world = new World(canvas, keyboard);
+}
+
+function hideAllScreens() {
     document.getElementById('startScreen').classList.add('d-none');
     document.getElementById('gameOverScreen').classList.add('d-none');
     document.getElementById('winScreen').classList.add('d-none');
     document.getElementById('pauseScreen').classList.add('d-none');
-    document.getElementById('gameUI').classList.remove('d-none');
-    
-    gamePaused = false;
-    initLevel(); // Erstellt das Level neu
-    world = new World(canvas, keyboard);
 }
 
 function gameOver() {
-    let randomImg = LOSE_IMAGES[Math.floor(Math.random() * LOSE_IMAGES.length)];
     let screen = document.getElementById('gameOverScreen');
-    screen.style.backgroundImage = `url('${randomImg}')`;
+    setRandomBackground(screen, LOSE_IMAGES);
     screen.classList.remove('d-none');
     document.getElementById('gameUI').classList.add('d-none');
     clearAllIntervals();
 }
 
 function winGame() {
-    let randomImg = WIN_IMAGES[Math.floor(Math.random() * WIN_IMAGES.length)];
     let screen = document.getElementById('winScreen');
-    screen.style.backgroundImage = `url('${randomImg}')`;
+    setRandomBackground(screen, WIN_IMAGES);
     screen.classList.remove('d-none');
     document.getElementById('gameUI').classList.add('d-none');
     clearAllIntervals();
+}
+
+function setRandomBackground(element, images) {
+    let randomImg = images[Math.floor(Math.random() * images.length)];
+    element.style.backgroundImage = `url('${randomImg}')`;
 }
 
 function restartGame() {
@@ -62,20 +78,46 @@ function restartGame() {
 
 function togglePause() {
     gamePaused = !gamePaused;
-    if (gamePaused) {
-        document.getElementById('pauseScreen').classList.remove('d-none');
-    } else {
-        document.getElementById('pauseScreen').classList.add('d-none');
+    let screen = document.getElementById('pauseScreen');
+    if (gamePaused) screen.classList.remove('d-none');
+    else screen.classList.add('d-none');
     }
-}
 
 function backToMenu() {
     clearAllIntervals();
+    hideAllScreens();
     document.getElementById('startScreen').classList.remove('d-none');
-    document.getElementById('gameOverScreen').classList.add('d-none');
-    document.getElementById('winScreen').classList.add('d-none');
-    document.getElementById('pauseScreen').classList.add('d-none');
     document.getElementById('gameUI').classList.add('d-none');
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('isMuted', isMuted);
+    updateMuteUI();
+}
+
+function updateMuteUI() {
+    let icon = document.getElementById('muteIcon');
+    icon.src = isMuted ? 'img/mute.png' : 'img/volume.png';
+    }
+
+function toggleFullscreen() {
+    let container = document.querySelector('.game-container');
+    if (!document.fullscreenElement) {
+        container.requestFullscreen().catch(err => {
+            alert(`Error: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function mobileKeyPress(key) {
+    keyboard[key] = true;
+}
+
+function mobileKeyRelease(key) {
+    keyboard[key] = false;
 }
 
 function clearAllIntervals() {

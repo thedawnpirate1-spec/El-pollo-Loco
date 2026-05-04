@@ -23,13 +23,13 @@ class World {
         this.backgroundObjects = level1.backgroundObjects;
         this.draw();
         this.setWorld();
-        this.checkCollisions();
         this.run();
     }
 
     setWorld(){
         this.character.world = this;
     }
+
     run(){
         setInterval(() => {
             if (gamePaused) return;
@@ -37,20 +37,26 @@ class World {
             this.checkThrowObjects();
             this.checkEndboss();
             this.checkGameStatus();
-        }, 50); // Increased frequency for accurate collisions
+        }, 50);
     }
     
     checkGameStatus() {
         if (this.isGameOver) return;
-        
+        this.checkDeath();
+        this.checkWin();
+    }
+
+    checkDeath() {
         if (this.character.isDead()) {
             this.isGameOver = true;
             setTimeout(() => {
                 if(typeof gameOver === 'function') gameOver();
-            }, 1000); // Wait 1 sec for death animation
+            }, 1000);
         }
-        
-        let endboss = this.level.enemies.find(function(e) { return e instanceof Endboss; });
+    }
+
+    checkWin() {
+        let endboss = this.level.enemies.find(e => e instanceof Endboss);
         if (endboss && endboss.isDead()) {
             this.isGameOver = true;
             setTimeout(() => {
@@ -79,67 +85,99 @@ class World {
         }
     }
     checkCollisions() {
-        this.level.coins.forEach(function(coin, index) {
+        this.checkCoinCollisions();
+        this.checkBottleCollisions();
+        this.checkEnemyCollisions();
+        this.checkThrowableCollisions();
+    }
+
+    checkCoinCollisions() {
+        this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
                 this.character.collectCoin();
                 this.coinBar.setPercentage(this.character.coins);
                 this.level.coins.splice(index, 1);
             }
-        }.bind(this));
+        });
+    }
 
-        this.level.bottles.forEach(function(bottle, index) {
-            if (this.character.isColliding(bottle)) {
-                if(this.character.bottles < 100) {
-                    this.character.collectBottle();
-                    this.bottleBar.setPercentage(this.character.bottles);
-                    this.level.bottles.splice(index, 1);
-                }
+    checkBottleCollisions() {
+        this.level.bottles.forEach((bottle, index) => {
+            if (this.character.isColliding(bottle) && this.character.bottles < 100) {
+                this.character.collectBottle();
+                this.bottleBar.setPercentage(this.character.bottles);
+                this.level.bottles.splice(index, 1);
             }
-        }.bind(this));
+        });
+    }
 
-        this.level.enemies.forEach(function(enemy, index) {
+    checkEnemyCollisions() {
+        this.level.enemies.forEach((enemy) => {
             if (this.character.isColliding(enemy)) {
-                if (enemy instanceof Endboss) {
-                    if (!enemy.isDead()) {
-                        this.character.hit();
-                        this.statusBar.setPercentage(this.character.energy);
-                    }
-                } else if (this.character.isAboveGround() && this.character.speedY < 0 && !enemy.isDead()) {
-                    // Jump on chicken to kill
-                    enemy.energy = 0; 
-                    this.character.jump(); // bounce off
-                    setTimeout(() => {
-                        let i = this.level.enemies.indexOf(enemy);
-                        if (i > -1) this.level.enemies.splice(i, 1);
-                    }, 1000);
-                } else if (!enemy.isDead()) {
-                    this.character.hit();
-                    this.statusBar.setPercentage(this.character.energy);
-                }
+                this.handleEnemyContact(enemy);
             }
-        }.bind(this));
+        });
+    }
 
-        this.throwableObjects.forEach(function(bottle) {
-            this.level.enemies.forEach(function(enemy) {
+    handleEnemyContact(enemy) {
+        if (enemy instanceof Endboss) {
+            this.handleBossContact(enemy);
+        } else if (this.character.isAboveGround() && this.character.speedY < 0 && !enemy.isDead()) {
+            this.killEnemy(enemy);
+        } else if (!enemy.isDead()) {
+            this.character.hit();
+            this.statusBar.setPercentage(this.character.energy);
+        }
+    }
+
+    handleBossContact(enemy) {
+        if (!enemy.isDead()) {
+            this.character.hit();
+            this.statusBar.setPercentage(this.character.energy);
+        }
+    }
+
+    killEnemy(enemy) {
+        enemy.energy = 0;
+        this.character.jump();
+        setTimeout(() => {
+            let i = this.level.enemies.indexOf(enemy);
+            if (i > -1) this.level.enemies.splice(i, 1);
+        }, 1000);
+    }
+
+    checkThrowableCollisions() {
+        this.throwableObjects.forEach((bottle) => {
+            this.level.enemies.forEach((enemy) => {
                 if (!bottle.hasSplashed && bottle.isColliding(enemy) && !enemy.isDead()) {
-                    bottle.splash();
-                    enemy.hit();
-                    this.endbossBar.setPercentage(enemy.energy / 140 * 100);
-                    
-                    if (!(enemy instanceof Endboss)) {
-                        setTimeout(() => {
-                            let i = this.level.enemies.indexOf(enemy);
-                            if (i > -1) this.level.enemies.splice(i, 1);
-                        }, 1000);
-                    }
-                    
-                    setTimeout(() => {
-                        let i = this.throwableObjects.indexOf(bottle);
-                        if (i > -1) this.throwableObjects.splice(i, 1);
-                    }, 300);
+                    this.hitEnemyWithBottle(bottle, enemy);
                 }
-            }.bind(this));
-        }.bind(this));
+            });
+        });
+    }
+
+    hitEnemyWithBottle(bottle, enemy) {
+        bottle.splash();
+        enemy.hit();
+        this.endbossBar.setPercentage(enemy.energy / 140 * 100);
+        if (!(enemy instanceof Endboss)) {
+            this.removeEnemyDelayed(enemy);
+        }
+        this.removeBottleDelayed(bottle);
+    }
+
+    removeEnemyDelayed(enemy) {
+        setTimeout(() => {
+            let i = this.level.enemies.indexOf(enemy);
+            if (i > -1) this.level.enemies.splice(i, 1);
+        }, 1000);
+    }
+
+    removeBottleDelayed(bottle) {
+        setTimeout(() => {
+            let i = this.throwableObjects.indexOf(bottle);
+            if (i > -1) this.throwableObjects.splice(i, 1);
+        }, 300);
     }
 
     draw(){
