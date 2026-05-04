@@ -11,8 +11,8 @@ constructor(){
     }
 
     animate() {
-        this.moveLeft();
         setInterval(() => {
+            if (gamePaused) return;
             this.x -= this.speed;
         }, 1000/60);
     }

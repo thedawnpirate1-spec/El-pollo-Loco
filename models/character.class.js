@@ -100,8 +100,14 @@ class Character extends MovableObject{
 
     /** Starts character animation intervals */
     animate() {
-        setInterval(() => this.handleMovement(), 1000 / 60);
-        setInterval(() => this.handleStateAnimations(), 50);
+        setInterval(() => {
+            if (gamePaused) return;
+            this.handleMovement();
+        }, 1000 / 60);
+        setInterval(() => {
+            if (gamePaused) return;
+            this.handleStateAnimations();
+        }, 50);
     }
 
     /** Handles movement and jump based on inputs */

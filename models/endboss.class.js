@@ -62,11 +62,18 @@ class Endboss extends MovableObject {
 
     /** Starts the endboss animation and movement intervals */
     animate() {
-        setInterval(() => this.handleMovement(), 1000 / 60);
-        setInterval(() => this.handleAnimations(), 200);
+        setInterval(() => {
+            if (gamePaused) return;
+            this.handleMovement();
+        }, 1000 / 60);
+        setInterval(() => {
+            if (gamePaused) return;
+            this.handleAnimations();
+        }, 200);
         
         // Attack timer
         setInterval(() => {
+            if (gamePaused) return;
             if (this.hadFirstContact && !this.isDead() && !this.isHurt()) {
                 this.isAttacking = true;
                 setTimeout(() => {

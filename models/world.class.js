@@ -8,6 +8,7 @@ class World {
     statusBar = new StatusBar();
     coinBar = new CoinBar();
     bottleBar = new BottleBar();
+    endbossBar = new EndbossBar();
     throwableObjects = [];
 
     isGameOver = false;
@@ -31,6 +32,7 @@ class World {
     }
     run(){
         setInterval(() => {
+            if (gamePaused) return;
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkEndboss();
@@ -122,6 +124,7 @@ class World {
                 if (!bottle.hasSplashed && bottle.isColliding(enemy) && !enemy.isDead()) {
                     bottle.splash();
                     enemy.hit();
+                    this.endbossBar.setPercentage(enemy.energy / 140 * 100);
                     
                     if (!(enemy instanceof Endboss)) {
                         setTimeout(() => {
@@ -150,6 +153,9 @@ class World {
         this.addToMap(this.statusBar);
         this.addToMap(this.coinBar);
         this.addToMap(this.bottleBar);
+        if (this.showEndbossBar()) {
+            this.addToMap(this.endbossBar);
+        }
         this.ctx.translate(this.camera_x, 0);
 
         this.addToMap(this.character);
@@ -196,16 +202,8 @@ class World {
     mo.x = mo.x * -1;
     }
 
-//   if(character.x + character.width > chicken.x && 
-//     character.y + character.height > chicken.y &&
-//     character.x < chicken.x &&
-//     character.y < chicken.y + chicken.height
-//   )
-
-//   isCollsion(mo){
-//     return this.x + this.width > mo.x &&
-//     this.y + this.height > mo.y && 
-//     this.x < mo.x && 
-//     this.y < mo.y + mo.height;
-//   }
+    showEndbossBar() {
+        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        return endboss && endboss.hadFirstContact;
+    }
 }

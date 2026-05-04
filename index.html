@@ -20,6 +20,7 @@
     <script defer src="./models/coin-bar.class.js"></script>
     <script defer src="./models/bottle.class.js"></script>
     <script defer src="./models/bottle-bar.class.js"></script>
+    <script defer src="./models/endboss-bar.class.js"></script>
     <script defer src="./levels/level1.js"></script>
     <script defer src="./models/throwable-object.class.js"></script>
     <script defer src="./models/world.class.js"></script>
@@ -44,17 +45,31 @@
             </div>
         </div>
 
+        <div id="pauseScreen" class="overlay d-none">
+            <div class="content">
+                <h1>PAUSE</h1>
+                <button onclick="togglePause()">Weiter</button>
+                <button onclick="backToMenu()">Hauptmenü</button>
+            </div>
+        </div>
+
         <div id="gameOverScreen" class="overlay d-none">
             <div class="content">
                 <button onclick="restartGame()">Erneut versuchen</button>
+                <button onclick="backToMenu()">Hauptmenü</button>
             </div>
         </div>
         
         <div id="winScreen" class="overlay d-none">
             <div class="content">
-                <h1>GEWONNEN!</h1>
-                <p>Du hast Señora Gallina besiegt!</p>
                 <button onclick="restartGame()">Erneut spielen</button>
+                <button onclick="backToMenu()">Hauptmenü</button>
+            </div>
+        </div>
+
+        <div id="gameUI" class="d-none">
+            <div id="pauseBtn" onclick="togglePause()">
+                <div class="pause-icon"></div>
             </div>
         </div>
     </div>
