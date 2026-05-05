@@ -12,6 +12,22 @@ body{
     position: relative;
     width: 720px;
     height: 480px;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+@media (max-height: 480px) {
+    .game-container {
+        height: 100vh;
+        width: calc(100vh * 1.5); /* 720 / 480 = 1.5 */
+    }
+}
+
+@media (max-width: 720px) {
+    .game-container {
+        width: 100vw;
+        height: calc(100vw / 1.5);
+    }
 }
 
 canvas{
@@ -143,7 +159,7 @@ button:hover {
 }
 
 /* --- New Controls --- */
-.top-controls {
+.top-controls, .menu-controls {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -152,7 +168,11 @@ button:hover {
     gap: 15px;
 }
 
-#muteBtn, #fullscreenBtn {
+.top-controls {
+    right: 130px; /* Shift pause button to the left if menu controls are present */
+}
+
+#muteBtn, #fullscreenBtn, #pauseBtn {
     width: 40px;
     height: 40px;
     cursor: pointer;
@@ -222,23 +242,51 @@ button:hover {
     }
 }
 
-@media (orientation: portrait) {
+@media (orientation: portrait) and (max-width: 1000px) {
     #turnDeviceOverlay {
         display: flex !important;
-        z-index: 100;
-    }
-    .game-container {
-        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        background-color: rgba(0,0,0,1);
     }
 }
 
-@media (max-width: 720px) {
-    .game-container {
-        width: 100vw;
-        height: 66.67vw; /* Maintain 720/480 ratio */
-    }
-    canvas {
-        width: 100%;
-        height: 100%;
-    }
+/* Removed conflicting responsive query */
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* --- Fullscreen Styles --- */
+.game-container:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+}
+
+.game-container:fullscreen canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Webkit vendor prefixes for Safari/Chrome */
+.game-container:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+}
+
+.game-container:-webkit-full-screen canvas {
+    width: 100%;
+    height: 100%;
 }

@@ -34,6 +34,14 @@
     <div class="game-container">
         <canvas id="canvas" width="720" height="480"></canvas>
         
+        <div class="menu-controls">
+            <div id="muteBtn" onclick="toggleMute()">
+                <img src="img/volume.png" id="muteIcon" alt="Mute">
+            </div>
+            <div id="fullscreenBtn" onclick="toggleFullscreen()">
+                <img src="img/fullscreen.png" alt="Fullscreen">
+            </div>
+        </div>
 
         <div id="startScreen" class="overlay">
             <div class="content">
@@ -70,12 +78,6 @@
 
         <div id="gameUI" class="d-none">
             <div class="top-controls">
-                <div id="muteBtn" onclick="toggleMute()">
-                    <img src="img/volume.png" id="muteIcon" alt="Mute">
-                </div>
-                <div id="fullscreenBtn" onclick="toggleFullscreen()">
-                    <img src="img/fullscreen.png" alt="Fullscreen">
-                </div>
                 <div id="pauseBtn" onclick="togglePause()">
                     <div class="pause-icon"></div>
                 </div>

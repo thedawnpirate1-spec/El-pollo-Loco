@@ -173,3 +173,18 @@ window.addEventListener('keyup', (event) =>{
         keyboard.D = false;
     }
 });
+
+window.addEventListener('resize', () => {
+    checkOrientation();
+});
+
+function checkOrientation() {
+    if (window.innerHeight > window.innerWidth && window.innerWidth <= 1000) {
+        if (typeof gamePaused !== 'undefined' && !gamePaused) {
+            let gameUI = document.getElementById('gameUI');
+            if (gameUI && !gameUI.classList.contains('d-none')) {
+                togglePause();
+            }
+        }
+    }
+}
