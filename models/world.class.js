@@ -70,6 +70,7 @@ class World {
         if(endboss && !endboss.hadFirstContact) {
             if (this.character.x > 2000) {
                 endboss.hadFirstContact = true;
+                audioHub.playSound('img/sounds/endboss/endbossApproach.wav');
             }
         }
     }
@@ -94,6 +95,7 @@ class World {
     checkCoinCollisions() {
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
+                audioHub.playSound('img/sounds/collectibles/collectSound.wav');
                 this.character.collectCoin();
                 this.coinBar.setPercentage(this.character.coins);
                 this.level.coins.splice(index, 1);
@@ -104,6 +106,7 @@ class World {
     checkBottleCollisions() {
         this.level.bottles.forEach((bottle, index) => {
             if (this.character.isColliding(bottle) && this.character.bottles < 100) {
+                audioHub.playSound('img/sounds/collectibles/bottleCollectSound.wav');
                 this.character.collectBottle();
                 this.bottleBar.setPercentage(this.character.bottles);
                 this.level.bottles.splice(index, 1);
@@ -122,7 +125,7 @@ class World {
     handleEnemyContact(enemy) {
         if (enemy instanceof Endboss) {
             this.handleBossContact(enemy);
-        } else if (this.character.isAboveGround() && this.character.speedY < 0 && !enemy.isDead()) {
+        } else if (this.character.isFalling && !enemy.isDead()) {
             this.killEnemy(enemy);
         } else if (!enemy.isDead()) {
             this.character.hit();
@@ -139,6 +142,11 @@ class World {
 
     killEnemy(enemy) {
         enemy.energy = 0;
+        if (enemy instanceof Chicken) {
+            audioHub.playSound('img/sounds/chicken/chickenDead.mp3');
+        } else if (enemy instanceof ChickenSmall) {
+            audioHub.playSound('img/sounds/chicken/chickenDead2.mp3');
+        }
         this.character.jump();
         setTimeout(() => {
             let i = this.level.enemies.indexOf(enemy);

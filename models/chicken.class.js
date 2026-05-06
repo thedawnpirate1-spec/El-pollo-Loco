@@ -27,6 +27,13 @@ class Chicken extends MovableObject{
 
     }
 
+    hit() {
+        super.hit();
+        if (this.isDead()) {
+            audioHub.playSound('img/sounds/chicken/chickenDead.mp3');
+        }
+    }
+
     animate(){
         setInterval(() => {
             if (gamePaused) return;

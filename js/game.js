@@ -2,7 +2,7 @@ let canvas;
 let world;
 let keyboard = new KeyBoard();
 let gamePaused = false;
-let isMuted = false;
+let audioHub = new AudioHub();
 
 const WIN_IMAGES = [
     'img/You won, you lost/You Win A.png',
@@ -24,14 +24,32 @@ const LOSE_IMAGES = [
 
 function init(){
     canvas = document.getElementById('canvas');
+    preloadSounds();
     loadMuteState();
+}
+
+function preloadSounds() {
+    audioHub.loadSounds([
+        'img/sounds/character/characterRun.mp3',
+        'img/sounds/character/characterJump.wav',
+        'img/sounds/character/characterDead.wav',
+        'img/sounds/character/characterDamage.mp3',
+        'img/sounds/character/characterSnoring.mp3',
+        'img/sounds/chicken/chickenDead.mp3',
+        'img/sounds/chicken/chickenDead2.mp3',
+        'img/sounds/collectibles/collectSound.wav',
+        'img/sounds/collectibles/bottleCollectSound.wav',
+        'img/sounds/throwable/bottleBreak.mp3',
+        'img/sounds/endboss/endbossApproach.wav',
+        'img/sounds/game/gameStart.mp3'
+    ]);
 }
 
 function loadMuteState() {
     let muted = localStorage.getItem('isMuted');
     if (muted === 'true') {
-        isMuted = true;
-        updateMuteUI();
+        audioHub.isMuted = false; // toggleMute will invert this
+        audioHub.toggleMute();
     }
 }
 
@@ -41,6 +59,7 @@ function startGame() {
     gamePaused = false;
     initLevel(); 
     world = new World(canvas, keyboard);
+    audioHub.playSound('img/sounds/game/gameStart.mp3');
 }
 
 function hideAllScreens() {
@@ -91,15 +110,9 @@ function backToMenu() {
 }
 
 function toggleMute() {
-    isMuted = !isMuted;
-    localStorage.setItem('isMuted', isMuted);
-    updateMuteUI();
+    audioHub.toggleMute();
+    localStorage.setItem('isMuted', audioHub.isMuted);
 }
-
-function updateMuteUI() {
-    let icon = document.getElementById('muteIcon');
-    icon.src = isMuted ? 'img/mute.png' : 'img/volume.png';
-    }
 
 function toggleFullscreen() {
     let container = document.querySelector('.game-container');

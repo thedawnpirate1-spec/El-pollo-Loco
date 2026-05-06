@@ -9,9 +9,17 @@ class MovableObject extends DrawableObject{
     applyGravity(){
         setInterval(() => {
             if (gamePaused) return;
-            if(this.isAboveGround()|| this.speedY > 0){
+            if(this.isAboveGround() || this.speedY > 0){
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
+                if (this.speedY < 0) this.isFalling = true;
+            } else {
+                // Reset falling speed when on ground
+                if (this.y >= 180 && !(this instanceof ThrowableObject)) {
+                    this.y = 180;
+                    this.speedY = 0;
+                    setTimeout(() => this.isFalling = false, 100); // 100ms grace period for jump attacks
+                }
             }
         }, 1000/25);
     };

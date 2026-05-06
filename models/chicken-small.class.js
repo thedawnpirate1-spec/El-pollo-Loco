@@ -26,6 +26,13 @@ class ChickenSmall extends MovableObject {
         this.animate();
     }
 
+    hit() {
+        super.hit();
+        if (this.isDead()) {
+            audioHub.playSound('img/sounds/chicken/chickenDead2.mp3');
+        }
+    }
+
     animate() {
         setInterval(() => {
             if (gamePaused) return;

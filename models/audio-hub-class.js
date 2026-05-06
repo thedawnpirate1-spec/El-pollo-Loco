@@ -1,6 +1,7 @@
 class AudioHub{
     volume = 1;
     isMuted = false;
+    audioCache = {};
 
     constructor(){}
 
@@ -20,11 +21,20 @@ class AudioHub{
         this.isMuted = !this.isMuted;
         const muteIcon = document.getElementById('muteIcon');
         
-        if (this.isMuted) {
-            muteIcon.src = 'img/mute.png';
-        } else {
-            muteIcon.src = 'img/volume.png';
+        if (muteIcon) {
+            if (this.isMuted) {
+                muteIcon.src = 'img/button icons/volume-x-svgrepo-com.svg';
+                this.pauseAllSounds();
+            } else {
+                muteIcon.src = 'img/button icons/volume-high-svgrepo-com.svg';
+            }
         }
+    }
+
+    pauseAllSounds() {
+        Object.values(this.audioCache).forEach(audio => {
+            audio.pause();
+        });
     }
 
     /**
@@ -43,4 +53,11 @@ class AudioHub{
             console.error("Audio not preloaded:", path);
         }
     }
-}
+
+    pauseSound(path) {
+        let audio = this.audioCache[path];
+        if (audio) {
+            audio.pause();
+        }
+    }
+}

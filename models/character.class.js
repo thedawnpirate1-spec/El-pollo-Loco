@@ -111,6 +111,7 @@ class Character extends MovableObject{
 
     handleMovement() {
         if (!this.world || !this.world.keyboard || this.isDead()) return;
+        audioHub.pauseSound('img/sounds/character/characterRun.mp3');
         if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) this.moveCharRight();
         if (this.world.keyboard.LEFT && this.x > 0) this.moveCharLeft();
         if (this.world.keyboard.SPACE && !this.isAboveGround()) this.jump();
@@ -121,11 +122,13 @@ class Character extends MovableObject{
     moveCharRight() {
         this.otherDirection = false;
         this.moveRight();
+        if (!this.isAboveGround()) audioHub.playSound('img/sounds/character/characterRun.mp3');
     }
 
     moveCharLeft() {
         this.moveLeft();
         this.otherDirection = true;
+        if (!this.isAboveGround()) audioHub.playSound('img/sounds/character/characterRun.mp3');
     }
 
     checkActivity() {
@@ -152,13 +155,16 @@ class Character extends MovableObject{
         let timePassed = new Date().getTime() - this.lastActionTime;
         if (timePassed > 3000) {
             this.playAnimation(this.IMAGES_SLEEP);
+            if (!this.isAboveGround()) audioHub.playSound('img/sounds/character/characterSnoring.mp3');
         } else {
             this.playAnimation(this.IMAGES_IDLE);
+            audioHub.pauseSound('img/sounds/character/characterSnoring.mp3');
         }
     }
 
     playDeadAnimation() {
         if(!this.deadAnimationStarted) {
+            audioHub.playSound('img/sounds/character/characterDead.wav');
             this.deadAnimationIndex = 0;
             this.deadAnimationStarted = true;
         }
@@ -177,5 +183,17 @@ class Character extends MovableObject{
         right: 20,
         bottom: 0
     };
-    
+
+    jump() {
+        super.jump();
+        audioHub.playSound('img/sounds/character/characterJump.wav');
+    }
+
+    hit() {
+        let wasHurt = this.isHurt();
+        super.hit();
+        if (!wasHurt && this.isHurt() && !this.isDead()) {
+            audioHub.playSound('img/sounds/character/characterDamage.mp3');
+        }
+    }
 }

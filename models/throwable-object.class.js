@@ -51,6 +51,7 @@ class ThrowableObject extends MovableObject {
     /** Plays splash animation and stops bottle movement */
     splash() {
         this.hasSplashed = true;
+        audioHub.playSound('img/sounds/throwable/bottleBreak.mp3');
         this.speedY = 0;
         this.acceleration = 0;
         clearInterval(this.moveInterval);
