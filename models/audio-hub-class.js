@@ -46,14 +46,22 @@ class AudioHub{
         
         let audio = this.audioCache[path];
         if (audio) {
-            let isLoop = ['img/sounds/game/gameStart.mp3', 'img/sounds/endboss/endbossApproach.wav', 'img/sounds/character/characterRun.mp3', 'img/sounds/character/characterSnoring.mp3'].includes(path);
+            let isLoop = ['img/sounds/endboss/endbossApproach.wav', 'img/sounds/character/characterRun.mp3', 'img/sounds/character/characterSnoring.mp3'].includes(path);
             if (isLoop) {
                 audio.loop = true;
             }
 
             if (audio.readyState >= 2) {
                 if (!isLoop) {
-                    audio.currentTime = 0;
+                    let sfx = audio.cloneNode();
+                    sfx.volume = this.volume;
+                    let playPromise = sfx.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            if (error.name !== 'AbortError') console.warn("Audio playback prevented:", error);
+                        });
+                    }
+                    return; // Done playing cloned sfx
                 } else {
                     if (!audio.paused) return; // Don't replay if already playing
                 }
@@ -67,13 +75,23 @@ class AudioHub{
             } else {
                 audio.addEventListener('canplay', () => {
                     if (!this.isMuted) {
-                        if (!isLoop) audio.currentTime = 0;
-                        audio.volume = this.volume;
-                        let playPromise = audio.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(e => {
-                                if (e.name !== 'AbortError') console.warn(e);
-                            });
+                        if (!isLoop) {
+                            let sfx = audio.cloneNode();
+                            sfx.volume = this.volume;
+                            let playPromise = sfx.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(e => {
+                                    if (e.name !== 'AbortError') console.warn(e);
+                                });
+                            }
+                        } else {
+                            audio.volume = this.volume;
+                            let playPromise = audio.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(e => {
+                                    if (e.name !== 'AbortError') console.warn(e);
+                                });
+                            }
                         }
                     }
                 }, { once: true });

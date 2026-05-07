@@ -85,6 +85,7 @@ function gameOver() {
     screen.classList.remove('d-none');
     document.getElementById('gameUI').classList.add('d-none');
     clearAllIntervals();
+    audioHub.pauseAllSounds();
 }
 
 function winGame() {
@@ -93,6 +94,7 @@ function winGame() {
     screen.classList.remove('d-none');
     document.getElementById('gameUI').classList.add('d-none');
     clearAllIntervals();
+    audioHub.pauseAllSounds();
 }
 
 function setRandomBackground(element, images) {
@@ -108,15 +110,21 @@ function restartGame() {
 function togglePause() {
     gamePaused = !gamePaused;
     let screen = document.getElementById('pauseScreen');
-    if (gamePaused) screen.classList.remove('d-none');
-    else screen.classList.add('d-none');
+    if (gamePaused) {
+        screen.classList.remove('d-none');
+        audioHub.pauseAllSounds();
+    } else {
+        screen.classList.add('d-none');
+        audioHub.playSound('img/sounds/game/gameStart.mp3');
     }
+}
 
 function backToMenu() {
     clearAllIntervals();
     hideAllScreens();
     document.getElementById('startScreen').classList.remove('d-none');
     document.getElementById('gameUI').classList.add('d-none');
+    audioHub.pauseAllSounds();
 }
 
 function toggleMute() {

@@ -31,14 +31,14 @@ body{
     max-height: 100vh;
 }
 
-@media (max-height: 480px) {
+@media (hover: hover) and (max-height: 480px) {
     .game-container {
         height: 100vh;
         width: calc(100vh * 1.5); /* 720 / 480 = 1.5 */
     }
 }
 
-@media (max-width: 720px) {
+@media (hover: hover) and (max-width: 720px) {
     .game-container {
         width: 100vw;
         height: calc(100vw / 1.5);
@@ -267,8 +267,60 @@ button:hover {
 }
 
 /* --- Responsiveness --- */
-@media (hover: none) and (pointer: coarse), (max-width: 1000px) {
-    /* Touch devices in general */
+/* --- Responsiveness (Separated Logic) --- */
+
+/* Mobile Portrait */
+@media (hover: none) and (orientation: portrait) {
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100vw;
+        background-color: black;
+        justify-content: center;
+    }
+
+    h1 {
+        display: none;
+    }
+
+    .game-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: calc(100vh * 1.5);
+        max-height: calc(100vw / 1.5);
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    #turnDeviceOverlay, #turnDeviceOverlay.d-none {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        background-color: rgba(0,0,0,1);
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .mobile-controls {
+        display: none;
+    }
+
+    #fullscreenBtn {
+        display: none;
+    }
+}
+
+/* Mobile Landscape */
+@media (hover: none) and (orientation: landscape) {
     body {
         margin: 0;
         padding: 0;
@@ -297,37 +349,9 @@ button:hover {
     .mobile-controls {
         display: flex;
     }
-    
+
     #fullscreenBtn {
         display: none;
-    }
-}
-
-@media (hover: none) and (pointer: coarse) and (orientation: portrait), (max-width: 1000px) and (orientation: portrait) {
-    /* Enforce landscape mode on touch devices */
-    #turnDeviceOverlay, #turnDeviceOverlay.d-none {
-        display: flex;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 9999;
-        background-color: rgba(0,0,0,1);
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-    }
-    
-    .mobile-controls {
-        display: none;
-    }
-}
-
-@media (hover: none) and (pointer: coarse) and (orientation: landscape), (max-width: 1000px) and (orientation: landscape) {
-    /* Adjustments for mobile landscape if needed */
-    .mobile-controls {
-        display: flex;
     }
 }
 

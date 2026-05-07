@@ -111,10 +111,25 @@ class Character extends MovableObject{
 
     handleMovement() {
         if (!this.world || !this.world.keyboard || this.isDead()) return;
-        audioHub.pauseSound('img/sounds/character/characterRun.mp3');
-        if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) this.moveCharRight();
-        if (this.world.keyboard.LEFT && this.x > 0) this.moveCharLeft();
+        
+        let isWalking = false;
+        
+        if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) {
+            this.moveCharRight();
+            isWalking = true;
+        }
+        if (this.world.keyboard.LEFT && this.x > 0) {
+            this.moveCharLeft();
+            isWalking = true;
+        }
         if (this.world.keyboard.SPACE && !this.isAboveGround()) this.jump();
+        
+        if (!isWalking || this.isAboveGround()) {
+            audioHub.pauseSound('img/sounds/character/characterRun.mp3');
+        } else {
+            audioHub.playSound('img/sounds/character/characterRun.mp3');
+        }
+        
         this.world.camera_x = -this.x + 100;
         this.checkActivity();
     }
@@ -122,13 +137,11 @@ class Character extends MovableObject{
     moveCharRight() {
         this.otherDirection = false;
         this.moveRight();
-        if (!this.isAboveGround()) audioHub.playSound('img/sounds/character/characterRun.mp3');
     }
 
     moveCharLeft() {
         this.moveLeft();
         this.otherDirection = true;
-        if (!this.isAboveGround()) audioHub.playSound('img/sounds/character/characterRun.mp3');
     }
 
     checkActivity() {
