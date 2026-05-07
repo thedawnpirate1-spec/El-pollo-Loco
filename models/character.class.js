@@ -141,8 +141,20 @@ class Character extends MovableObject{
     handleStateAnimations() {
         if (this.isDead()) this.playDeadAnimation();
         else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
-        else if (this.isAboveGround()) this.playAnimation(this.IMAGES_JUMPING);
-        else this.handleGroundAnimations();
+        else if (this.isAboveGround()) {
+            if (this.jumpAnimationIndex === undefined) this.jumpAnimationIndex = 0;
+            let frame = Math.floor(this.jumpAnimationIndex / 2); // 2 ticks per frame -> 100ms per frame
+            if (frame < this.IMAGES_JUMPING.length) {
+                this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
+                this.jumpAnimationIndex++;
+            } else {
+                this.img = this.imageCache[this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1]];
+            }
+        }
+        else {
+            this.jumpAnimationIndex = 0;
+            this.handleGroundAnimations();
+        }
     }
 
     handleGroundAnimations() {
@@ -186,6 +198,7 @@ class Character extends MovableObject{
 
     jump() {
         super.jump();
+        this.jumpAnimationIndex = 0;
         audioHub.playSound('img/sounds/character/characterJump.wav');
     }
 

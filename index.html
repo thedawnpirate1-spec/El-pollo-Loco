@@ -28,6 +28,7 @@
     <script defer src="./models/audio-hub-class.js"></script>
     <script defer src="./js/game.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="img/button icons/favicon el pollo loco.png">
 </head>
 
 <body onload="init()">
@@ -64,16 +65,16 @@
         </div>
 
         <div id="gameOverScreen" class="overlay d-none">
-            <div class="content">
-                <button onclick="restartGame()">Erneut versuchen</button>
-                <button onclick="backToMenu()">Hauptmenü</button>
+            <div class="result-buttons">
+                <button class="btn-restart" onclick="restartGame()">Neustart</button>
+                <button class="btn-home" onclick="backToMenu()">Hauptmenü</button>
             </div>
         </div>
         
         <div id="winScreen" class="overlay d-none">
-            <div class="content">
-                <button onclick="restartGame()">Erneut spielen</button>
-                <button onclick="backToMenu()">Hauptmenü</button>
+            <div class="result-buttons">
+                <button class="btn-restart" onclick="restartGame()">Neustart</button>
+                <button class="btn-home" onclick="backToMenu()">Hauptmenü</button>
             </div>
         </div>
 
@@ -86,19 +87,19 @@
 
             <div class="mobile-controls">
                 <div class="mobile-controls-left">
-                    <div id="btnLeft" class="mobile-btn" onmousedown="mobileKeyPress('LEFT')" onmouseup="mobileKeyRelease('LEFT')" ontouchstart="mobileKeyPress('LEFT')" ontouchend="mobileKeyRelease('LEFT')">
-                        <img src="img/left_arrow.png" alt="Left">
+                    <div id="btnLeft" class="mobile-btn" onmousedown="mobileKeyPress('LEFT')" onmouseup="mobileKeyRelease('LEFT')" onmouseleave="mobileKeyRelease('LEFT')" ontouchstart="if(event.cancelable) event.preventDefault(); mobileKeyPress('LEFT')" ontouchend="if(event.cancelable) event.preventDefault(); mobileKeyRelease('LEFT')" ontouchcancel="if(event.cancelable) event.preventDefault(); mobileKeyRelease('LEFT')">
+                        <img src="img/button icons/arrow-left.svg" alt="Left">
                     </div>
-                    <div id="btnRight" class="mobile-btn" onmousedown="mobileKeyPress('RIGHT')" onmouseup="mobileKeyRelease('RIGHT')" ontouchstart="mobileKeyPress('RIGHT')" ontouchend="mobileKeyRelease('RIGHT')">
-                        <img src="img/right_arrow.png" alt="Right">
+                    <div id="btnRight" class="mobile-btn" onmousedown="mobileKeyPress('RIGHT')" onmouseup="mobileKeyRelease('RIGHT')" onmouseleave="mobileKeyRelease('RIGHT')" ontouchstart="if(event.cancelable) event.preventDefault(); mobileKeyPress('RIGHT')" ontouchend="if(event.cancelable) event.preventDefault(); mobileKeyRelease('RIGHT')" ontouchcancel="if(event.cancelable) event.preventDefault(); mobileKeyRelease('RIGHT')">
+                        <img src="img/button icons/arrow-right.svg" alt="Right">
                     </div>
                 </div>
                 <div class="mobile-controls-right">
-                    <div id="btnJump" class="mobile-btn" onmousedown="mobileKeyPress('SPACE')" onmouseup="mobileKeyRelease('SPACE')" ontouchstart="mobileKeyPress('SPACE')" ontouchend="mobileKeyRelease('SPACE')">
-                        <img src="img/jump.png" alt="Jump">
+                    <div id="btnJump" class="mobile-btn" onmousedown="mobileKeyPress('SPACE')" onmouseup="mobileKeyRelease('SPACE')" onmouseleave="mobileKeyRelease('SPACE')" ontouchstart="if(event.cancelable) event.preventDefault(); mobileKeyPress('SPACE')" ontouchend="if(event.cancelable) event.preventDefault(); mobileKeyRelease('SPACE')" ontouchcancel="if(event.cancelable) event.preventDefault(); mobileKeyRelease('SPACE')">
+                        <img src="img/button icons/arrow-up.svg" alt="Jump">
                     </div>
-                    <div id="btnThrow" class="mobile-btn" onmousedown="mobileKeyPress('D')" onmouseup="mobileKeyRelease('D')" ontouchstart="mobileKeyPress('D')" ontouchend="mobileKeyRelease('D')">
-                        <img src="img/throw.png" alt="Throw">
+                    <div id="btnThrow" class="mobile-btn" onmousedown="mobileKeyPress('D')" onmouseup="mobileKeyRelease('D')" onmouseleave="mobileKeyRelease('D')" ontouchstart="if(event.cancelable) event.preventDefault(); mobileKeyPress('D')" ontouchend="if(event.cancelable) event.preventDefault(); mobileKeyRelease('D')" ontouchcancel="if(event.cancelable) event.preventDefault(); mobileKeyRelease('D')">
+                        <img src="img/button icons/bottle-glass-throw.svg" alt="Throw">
                     </div>
                 </div>
             </div>
@@ -107,9 +108,9 @@
         <div id="turnDeviceOverlay" class="overlay d-none">
             <div class="content">
                 <h2>Bitte drehe dein Gerät</h2>
-                <img src="img/turn_device.png" alt="Turn Device" style="width: 100px;">
             </div>
         </div>
     </div>
-
+    <a href="impressum.html" class="impressum-link">Impressum</a>
+</body>
 </html>

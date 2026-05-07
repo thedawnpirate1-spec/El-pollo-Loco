@@ -56,7 +56,7 @@ class World {
     }
 
     checkWin() {
-        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        let endboss = this.level.enemies.find(function(e) { return e instanceof Endboss; });
         if (endboss && endboss.isDead()) {
             this.isGameOver = true;
             setTimeout(() => {
@@ -77,7 +77,8 @@ class World {
     checkThrowObjects() {
         if(this.keyboard.D){
             if (this.character.bottles > 0) {
-                let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+                let bottleX = this.character.otherDirection ? this.character.x + 20 : this.character.x + 40;
+                let bottle = new ThrowableObject(bottleX, this.character.y + 100, this.character.otherDirection);
                 this.throwableObjects.push(bottle);
                 this.character.bottles -= 20;
                 this.bottleBar.setPercentage(this.character.bottles);
@@ -93,14 +94,14 @@ class World {
     }
 
     checkCoinCollisions() {
-        this.level.coins.forEach((coin, index) => {
+        this.level.coins.forEach(function(coin, index) {
             if (this.character.isColliding(coin)) {
                 audioHub.playSound('img/sounds/collectibles/collectSound.wav');
                 this.character.collectCoin();
                 this.coinBar.setPercentage(this.character.coins);
                 this.level.coins.splice(index, 1);
             }
-        });
+        }, this);
     }
 
     checkBottleCollisions() {

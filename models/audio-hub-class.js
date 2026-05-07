@@ -46,9 +46,38 @@ class AudioHub{
         
         let audio = this.audioCache[path];
         if (audio) {
-            audio.currentTime = 0; // Reset to start for quick replays
-            audio.volume = this.volume;
-            audio.play();
+            let isLoop = ['img/sounds/game/gameStart.mp3', 'img/sounds/endboss/endbossApproach.wav', 'img/sounds/character/characterRun.mp3', 'img/sounds/character/characterSnoring.mp3'].includes(path);
+            if (isLoop) {
+                audio.loop = true;
+            }
+
+            if (audio.readyState >= 2) {
+                if (!isLoop) {
+                    audio.currentTime = 0;
+                } else {
+                    if (!audio.paused) return; // Don't replay if already playing
+                }
+                audio.volume = this.volume;
+                let playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        if (error.name !== 'AbortError') console.warn("Audio playback prevented:", error);
+                    });
+                }
+            } else {
+                audio.addEventListener('canplay', () => {
+                    if (!this.isMuted) {
+                        if (!isLoop) audio.currentTime = 0;
+                        audio.volume = this.volume;
+                        let playPromise = audio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(e => {
+                                if (e.name !== 'AbortError') console.warn(e);
+                            });
+                        }
+                    }
+                }, { once: true });
+            }
         } else {
             console.error("Audio not preloaded:", path);
         }
@@ -60,4 +89,4 @@ class AudioHub{
             audio.pause();
         }
     }
-}
+}

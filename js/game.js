@@ -57,6 +57,16 @@ function startGame() {
     hideAllScreens();
     document.getElementById('gameUI').classList.remove('d-none');
     gamePaused = false;
+    
+    if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+        let container = document.querySelector('.game-container');
+        if (!document.fullscreenElement && container.requestFullscreen) {
+            container.requestFullscreen().catch(err => {
+                console.log(`Error requesting fullscreen: ${err.message}`);
+            });
+        }
+    }
+
     initLevel(); 
     world = new World(canvas, keyboard);
     audioHub.playSound('img/sounds/game/gameStart.mp3');
@@ -200,4 +210,4 @@ function checkOrientation() {
             }
         }
     }
-}
+}

@@ -8,6 +8,21 @@ body{
     color: white;
 }
 
+.impressum-link {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 16px;
+    z-index: 100;
+}
+
+.impressum-link:hover {
+    color: white;
+    text-decoration: underline;
+}
 .game-container {
     position: relative;
     width: 720px;
@@ -51,19 +66,32 @@ canvas{
     z-index: 10;
 }
 
-.d-none {
-    display: none !important;
+.d-none,
+#startScreen.d-none,
+#winScreen.d-none,
+#gameOverScreen.d-none,
+#pauseScreen.d-none,
+#turnDeviceOverlay.d-none,
+#gameUI.d-none,
+.overlay.d-none {
+    display: none;
 }
 
 .content {
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 20px;
-    border-radius: 80px;
+    padding: 20px 40px;
+    border-radius: 20px;
     text-align: center;
     box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
-    gap: 30px;
+    gap: 15px;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
 }
 
 .content h2 {
@@ -97,26 +125,22 @@ button:hover {
     background-image: url('img/9_intro_outro_screens/start/startscreen_1.png');
 }
 
-#winScreen {
-    align-items: flex-end;
+#winScreen, #gameOverScreen {
+    background-color: rgba(0, 0, 0, 0.7);
+    background-size: 50%;
+    background-position: center 20%;
+    background-blend-mode: screen;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
     padding-bottom: 40px;
 }
 
-#gameOverScreen {
-    align-items: flex-end;
-    padding-bottom: 40px;
-}
-
-#winScreen h1 {
-    color: white;
-    font-size: 40px;
-    text-shadow: 2px 2px 0px black;
-    margin-top: 0;
-}
-
-#winScreen p {
-    color: white;
-    font-size: 20px;
+.result-buttons {
+    display: flex;
+    gap: 20px;
+    z-index: 100;
 }
 
 #pauseScreen {
@@ -125,11 +149,15 @@ button:hover {
 
 #gameUI {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 5;
-    display: flex;
-    gap: 10px;
+    pointer-events: none;
+}
+#gameUI > * {
+    pointer-events: auto;
 }
 
 #pauseBtn, #muteBtn, #fullscreenBtn, .mobile-btn {
@@ -222,6 +250,9 @@ button:hover {
     border: 3px solid white;
     -webkit-user-select: none;
     user-select: none;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    outline: none;
 }
 
 .mobile-btn img {
@@ -236,15 +267,46 @@ button:hover {
 }
 
 /* --- Responsiveness --- */
-@media (max-width: 1000px) {
+@media (hover: none) and (pointer: coarse), (max-width: 1000px) {
+    /* Touch devices in general */
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100vw;
+        background-color: black;
+        justify-content: center;
+    }
+
+    h1 {
+        display: none;
+    }
+
+    .game-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: calc(100vh * 1.5);
+        max-height: calc(100vw / 1.5);
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+    }
+
     .mobile-controls {
         display: flex;
     }
+    
+    #fullscreenBtn {
+        display: none;
+    }
 }
 
-@media (orientation: portrait) and (max-width: 1000px) {
-    #turnDeviceOverlay {
-        display: flex !important;
+@media (hover: none) and (pointer: coarse) and (orientation: portrait), (max-width: 1000px) and (orientation: portrait) {
+    /* Enforce landscape mode on touch devices */
+    #turnDeviceOverlay, #turnDeviceOverlay.d-none {
+        display: flex;
         position: fixed;
         top: 0;
         left: 0;
@@ -252,6 +314,20 @@ button:hover {
         height: 100vh;
         z-index: 9999;
         background-color: rgba(0,0,0,1);
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    .mobile-controls {
+        display: none;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape), (max-width: 1000px) and (orientation: landscape) {
+    /* Adjustments for mobile landscape if needed */
+    .mobile-controls {
+        display: flex;
     }
 }
 

@@ -21,7 +21,7 @@ class ThrowableObject extends MovableObject {
     moveInterval;
     animInterval;
 
-    constructor(x, y) {
+    constructor(x, y, direction) {
         super();
         this.loadImage(this.IMAGES_ROTATION[0]);
         this.loadImages(this.IMAGES_ROTATION);
@@ -30,6 +30,7 @@ class ThrowableObject extends MovableObject {
         this.y = y;
         this.height = 60;
         this.width = 50;
+        this.otherDirection = direction;
         this.throw();
     }
 
@@ -39,7 +40,11 @@ class ThrowableObject extends MovableObject {
         this.applyGravity();
         this.moveInterval = setInterval(() => {
             if (gamePaused) return;
-            this.x += 8;
+            if (this.otherDirection) {
+                this.x -= 8;
+            } else {
+                this.x += 8;
+            }
         }, 25);
 
         this.animInterval = setInterval(() => {
