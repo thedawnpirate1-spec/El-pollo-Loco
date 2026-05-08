@@ -138,8 +138,8 @@ button:hover {
 
 #winScreen, #gameOverScreen {
     background-color: rgba(0, 0, 0, 0.7);
-    background-size: 50%;
-    background-position: center 20%;
+    background-size: contain;
+    background-position: center;
     background-blend-mode: screen;
     display: flex;
     flex-direction: column;

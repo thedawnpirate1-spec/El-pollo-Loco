@@ -9,7 +9,6 @@ class World {
     coinBar = new CoinBar();
     bottleBar = new BottleBar();
     endbossBar = new EndbossBar();
-    endbossIcon = new DrawableObject();
     throwableObjects = [];
 
     isGameOver = false;
@@ -23,13 +22,6 @@ class World {
         this.clouds = level1.clouds;
         this.backgroundObjects = level1.backgroundObjects;
         
-        // Setup Endboss Icon
-        this.endbossIcon.loadImage('img/7_statusbars/3_icons/icon_health_endboss.png');
-        this.endbossIcon.x = 450;
-        this.endbossIcon.y = 15;
-        this.endbossIcon.width = 50;
-        this.endbossIcon.height = 50;
-
         this.draw();
         this.setWorld();
         this.run();
@@ -103,6 +95,13 @@ class World {
     }
     checkThrowObjects() {
         if(this.keyboard.D){
+            let timeNow = new Date().getTime();
+            this.lastThrowTime = this.lastThrowTime || 0;
+            if (timeNow - this.lastThrowTime < 1000) {
+                this.keyboard.D = false;
+                return; // Cooldown active
+            }
+
             if (this.character.bottles > 0) {
                 let bottleX = this.character.otherDirection ? this.character.x + 20 : this.character.x + 40;
                 let bottle = new ThrowableObject(bottleX, this.character.y + 100, this.character.otherDirection);
@@ -110,6 +109,7 @@ class World {
                 this.character.bottles -= 20;
                 this.bottleBar.setPercentage(this.character.bottles);
                 this.keyboard.D = false; // Prevent machine-gun throwing
+                this.lastThrowTime = timeNow;
             }
         }
     }
@@ -125,6 +125,13 @@ class World {
             if (this.character.isColliding(coin)) {
                 audioHub.playSound('img/sounds/collectibles/collectSound.wav');
                 this.character.collectCoin();
+                
+                if (this.character.coins >= 100) {
+                    this.character.energy = 180; // Full health
+                    this.character.coins = 0; // Reset coins to allow multiple heals
+                    this.statusBar.setPercentage(this.character.energy / 1.8); // Update health visually
+                }
+                
                 this.coinBar.setPercentage(this.character.coins);
                 this.level.coins.splice(index, 1);
             }
@@ -157,14 +164,14 @@ class World {
             this.killEnemy(enemy);
         } else if (!enemy.isDead()) {
             this.character.hit();
-            this.statusBar.setPercentage(this.character.energy);
+            this.statusBar.setPercentage(this.character.energy / 1.8);
         }
     }
 
     handleBossContact(enemy) {
         if (!enemy.isDead()) {
             this.character.hit();
-            this.statusBar.setPercentage(this.character.energy);
+            this.statusBar.setPercentage(this.character.energy / 1.8);
         }
     }
 
@@ -241,7 +248,6 @@ class World {
         this.addToMap(this.bottleBar);
         if (this.showEndbossBar()) {
             this.addToMap(this.endbossBar);
-            this.addToMap(this.endbossIcon);
         }
         this.ctx.translate(this.camera_x, 0);
 
