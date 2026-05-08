@@ -9,6 +9,7 @@ class World {
     coinBar = new CoinBar();
     bottleBar = new BottleBar();
     endbossBar = new EndbossBar();
+    endbossIcon = new DrawableObject();
     throwableObjects = [];
 
     isGameOver = false;
@@ -21,6 +22,14 @@ class World {
         this.enemies = level1.enemies;
         this.clouds = level1.clouds;
         this.backgroundObjects = level1.backgroundObjects;
+        
+        // Setup Endboss Icon
+        this.endbossIcon.loadImage('img/7_statusbars/3_icons/icon_health_endboss.png');
+        this.endbossIcon.x = 450;
+        this.endbossIcon.y = 15;
+        this.endbossIcon.width = 50;
+        this.endbossIcon.height = 50;
+
         this.draw();
         this.setWorld();
         this.run();
@@ -232,6 +241,7 @@ class World {
         this.addToMap(this.bottleBar);
         if (this.showEndbossBar()) {
             this.addToMap(this.endbossBar);
+            this.addToMap(this.endbossIcon);
         }
         this.ctx.translate(this.camera_x, 0);
 
