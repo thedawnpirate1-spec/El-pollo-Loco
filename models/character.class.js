@@ -112,6 +112,13 @@ class Character extends MovableObject{
     handleMovement() {
         if (!this.world || !this.world.keyboard || this.isDead()) return;
         
+        // Fall faster when moving downwards
+        if (this.speedY < 0 && this.isAboveGround()) {
+            this.acceleration = 2.5; 
+        } else if (!this.isAboveGround()) {
+            this.acceleration = 1; 
+        }
+
         let isWalking = false;
         
         if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) {
@@ -211,6 +218,7 @@ class Character extends MovableObject{
 
     jump() {
         super.jump();
+        this.speedY = 17.5; // Roughly 3/4 of the original jump height
         this.jumpAnimationIndex = 0;
         audioHub.playSound('img/sounds/character/characterJump.wav');
     }

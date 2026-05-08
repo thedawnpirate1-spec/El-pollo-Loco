@@ -208,7 +208,7 @@ class World {
         bottle.splash();
         if (enemy instanceof Endboss) {
             enemy.hit();
-            this.endbossBar.setPercentage(enemy.energy / 140 * 100);
+            this.endbossBar.setPercentage(enemy.energy);
         } else {
             enemy.energy = 0; // Kill instant
             if (enemy instanceof Chicken) {
