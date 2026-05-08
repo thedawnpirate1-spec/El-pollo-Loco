@@ -40,10 +40,17 @@ class ThrowableObject extends MovableObject {
         this.applyGravity();
         this.moveInterval = setInterval(() => {
             if (gamePaused) return;
+            if (this.hasSplashed) return;
             if (this.otherDirection) {
                 this.x -= 8;
             } else {
                 this.x += 8;
+            }
+            
+            // Boden berühren -> Platz animation & Sound
+            if (this.y >= 360) {
+                this.y = 360; // Set to ground level exactly
+                this.splash();
             }
         }, 25);
 

@@ -56,7 +56,7 @@ class Endboss extends MovableObject {
         this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_DEAD);
-        this.x = 2500;
+        this.x = 5500;
         this.animate();
     }
 
@@ -88,6 +88,18 @@ class Endboss extends MovableObject {
         if (this.hadFirstContact && !this.isDead() && !this.isAttacking) {
             this.moveLeft();
             this.otherDirection = false;
+        }
+    }
+
+    /** Overrides hit to increase speed as health decreases */
+    hit() {
+        super.hit();
+        if (this.energy <= 100 && this.energy > 60) {
+            this.speed = 3.0; // Phase 2
+        } else if (this.energy <= 60 && this.energy > 20) {
+            this.speed = 4.5; // Phase 3
+        } else if (this.energy <= 20) {
+            this.speed = 7.0; // Enraged
         }
     }
 

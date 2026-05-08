@@ -194,10 +194,19 @@ button:hover {
     z-index: 20;
     display: flex;
     gap: 15px;
+    transition: right 0.5s ease-in-out;
 }
 
 .top-controls {
     right: 130px; /* Shift pause button to the left if menu controls are present */
+}
+
+.game-container.boss-mode .menu-controls {
+    right: calc(50% - 47px);
+}
+
+.game-container.boss-mode .top-controls {
+    right: calc(50% + 63px);
 }
 
 #muteBtn, #fullscreenBtn, #pauseBtn {

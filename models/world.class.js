@@ -68,11 +68,29 @@ class World {
     checkEndboss() {
         let endboss = this.level.enemies.find(function(e) { return e instanceof Endboss; });
         if(endboss && !endboss.hadFirstContact) {
-            if (this.character.x > 2000) {
+            if (this.character.x > 5000) {
                 endboss.hadFirstContact = true;
                 audioHub.playSound('img/sounds/endboss/endbossApproach.wav');
+                this.spawnBossBottles();
+                document.querySelector('.game-container').classList.add('boss-mode');
             }
         }
+    }
+
+    spawnBossBottles() {
+        let newBottles = [
+            new Bottle(1700, 360),
+            new Bottle(1850, 360),
+            new Bottle(2000, 360),
+            new Bottle(2150, 360),
+            new Bottle(2300, 360),
+            new Bottle(4700, 360),
+            new Bottle(4850, 360),
+            new Bottle(5000, 360),
+            new Bottle(5150, 360),
+            new Bottle(5300, 360)
+        ];
+        this.level.bottles.push(...newBottles);
     }
     checkThrowObjects() {
         if(this.keyboard.D){
@@ -157,8 +175,13 @@ class World {
 
     checkThrowableCollisions() {
         this.throwableObjects.forEach((bottle) => {
+            if (bottle.hasSplashed && bottle.y >= 360 && !bottle.isRemoving) {
+                bottle.isRemoving = true;
+                this.removeBottleDelayed(bottle);
+            }
             this.level.enemies.forEach((enemy) => {
                 if (!bottle.hasSplashed && bottle.isColliding(enemy) && !enemy.isDead()) {
+                    bottle.isRemoving = true;
                     this.hitEnemyWithBottle(bottle, enemy);
                 }
             });
@@ -167,9 +190,16 @@ class World {
 
     hitEnemyWithBottle(bottle, enemy) {
         bottle.splash();
-        enemy.hit();
-        this.endbossBar.setPercentage(enemy.energy / 140 * 100);
-        if (!(enemy instanceof Endboss)) {
+        if (enemy instanceof Endboss) {
+            enemy.hit();
+            this.endbossBar.setPercentage(enemy.energy / 140 * 100);
+        } else {
+            enemy.energy = 0; // Kill instant
+            if (enemy instanceof Chicken) {
+                audioHub.playSound('img/sounds/chicken/chickenDead.mp3');
+            } else if (enemy instanceof ChickenSmall) {
+                audioHub.playSound('img/sounds/chicken/chickenDead2.mp3');
+            }
             this.removeEnemyDelayed(enemy);
         }
         this.removeBottleDelayed(bottle);
