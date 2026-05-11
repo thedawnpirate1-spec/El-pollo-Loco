@@ -2,6 +2,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    min-height: 100vh;
     font-family: 'Luckiest Guy', 'Impact', 'Arial Black', sans-serif;
     margin: 0;
     background-image: url('img/5_background/complete_background.png');
@@ -13,10 +15,7 @@ body {
 }
 
 .impressum-link {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 10px;
     color: rgba(255, 255, 255, 0.6);
     text-decoration: none;
     font-size: 16px;
@@ -60,6 +59,7 @@ canvas{
     left: 0;
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: center;
@@ -77,14 +77,15 @@ canvas{
 #pauseScreen.d-none,
 #turnDeviceOverlay.d-none,
 #gameUI.d-none,
+#infoBtn.d-none,
 .overlay.d-none {
     display: none;
 }
 
-.content {
+.start-content, .controls-content, .pause-content, .turn-device-content {
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 20px 40px;
+    padding: 16px 24px;
     border-radius: 20px;
     text-align: center;
     box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
@@ -98,12 +99,16 @@ canvas{
     overflow-y: auto;
 }
 
-.content h2 {
+.start-content {
+    margin-top: 400px;
+}
+
+.controls-content h2, .turn-device-content h2 {
     margin-top: 0;
     color: #ff9900;
 }
 
-.content p {
+.controls-content p {
     margin: 10px 0;
     font-size: 18px;
 }
@@ -220,7 +225,7 @@ button:hover {
     right: calc(50% + 63px);
 }
 
-#muteBtn, #fullscreenBtn, #pauseBtn {
+#muteBtn, #fullscreenBtn, #pauseBtn, #infoBtn {
     width: 40px;
     height: 40px;
     cursor: pointer;
@@ -233,12 +238,18 @@ button:hover {
     transition: 0.1s;
 }
 
-#muteBtn img, #fullscreenBtn img {
+.info-icon {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+
+#muteBtn img, #fullscreenBtn img, #infoBtn img {
     width: 24px;
     height: 24px;
 }
 
-#muteBtn:hover, #fullscreenBtn:hover {
+#muteBtn:hover, #fullscreenBtn:hover, #infoBtn:hover {
     transform: scale(1.1);
     background-color: rgba(255, 153, 0, 1);
 }

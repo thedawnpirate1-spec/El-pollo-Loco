@@ -56,6 +56,7 @@ function loadMuteState() {
 function startGame() {
     hideAllScreens();
     document.getElementById('gameUI').classList.remove('d-none');
+    document.getElementById('infoBtn').classList.add('d-none');
     gamePaused = false;
     
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
@@ -77,6 +78,15 @@ function hideAllScreens() {
     document.getElementById('gameOverScreen').classList.add('d-none');
     document.getElementById('winScreen').classList.add('d-none');
     document.getElementById('pauseScreen').classList.add('d-none');
+    document.getElementById('controlsScreen').classList.add('d-none');
+}
+
+function openControls() {
+    document.getElementById('controlsScreen').classList.remove('d-none');
+}
+
+function closeControls() {
+    document.getElementById('controlsScreen').classList.add('d-none');
 }
 
 function gameOver() {
@@ -124,6 +134,7 @@ function backToMenu() {
     hideAllScreens();
     document.getElementById('startScreen').classList.remove('d-none');
     document.getElementById('gameUI').classList.add('d-none');
+    document.getElementById('infoBtn').classList.remove('d-none');
     audioHub.pauseAllSounds();
 }
 

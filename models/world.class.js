@@ -240,8 +240,16 @@ class World {
 
         this.ctx.translate(this.camera_x, 0);
         this.addObjectsToMap(this.level.backgroundObjects);
+        this.addObjectsToMap(this.level.clouds);
+
+        this.addToMap(this.character);
+        this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.level.coins);
+        this.addObjectsToMap(this.level.bottles);
+        this.addObjectsToMap(this.throwableObjects);
 
         this.ctx.translate(-this.camera_x, 0);
+        
         // -----Space for fixed objects like-----
         this.addToMap(this.statusBar);
         this.addToMap(this.coinBar);
@@ -249,16 +257,7 @@ class World {
         if (this.showEndbossBar()) {
             this.addToMap(this.endbossBar);
         }
-        this.ctx.translate(this.camera_x, 0);
 
-        this.addToMap(this.character);
-        this.addObjectsToMap(this.level.clouds);
-        this.addObjectsToMap(this.level.enemies);
-        this.addObjectsToMap(this.level.coins);
-        this.addObjectsToMap(this.level.bottles);
-        this.addObjectsToMap(this.throwableObjects);
-
-        this.ctx.translate(-this.camera_x, 0);
         let self = this;
         requestAnimationFrame(function(){
             self.draw();

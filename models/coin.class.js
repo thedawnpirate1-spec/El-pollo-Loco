@@ -5,10 +5,10 @@ class Coin extends MovableObject {
         'img/8_coin/coin_2.png'
     ];
     offset = {
-        top: 40,
-        bottom: 40,
-        left: 40,
-        right: 40
+        top: 45,
+        bottom: 45,
+        left: 45,
+        right: 45
     };
     constructor(x, y) {
         super();

@@ -12,8 +12,8 @@ class ChickenSmall extends MovableObject {
     offset = {
         top: 5,
         bottom: 5,
-        left: 5,
-        right: 5
+        left: 10,
+        right: 10
     };
 
     constructor() {

@@ -6,10 +6,10 @@ class Bottle extends MovableObject {
     ];
 
     offset = {
-        top: 10,
-        bottom: 10,
-        left: 20,
-        right: 20
+        top: 15,
+        bottom: 15,
+        left: 25,
+        right: 25
     };
 
     constructor(x, y) {
