@@ -1,4 +1,11 @@
+/**
+ * Global variable storing the initialized level.
+ * @type {Level}
+ */
 let level1;
+/**
+ * Initializes Level 1 by creating all objects and setting the level1 variable.
+ */
 function initLevel() {
     level1 = new Level(
     [

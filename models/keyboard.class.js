@@ -1,3 +1,6 @@
+/**
+ * Class representing the state of keyboard inputs.
+ */
 class KeyBoard {
     LEFT = false;
     RIGHT = false;

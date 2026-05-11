@@ -1,3 +1,7 @@
+/**
+ * Base class for all moving objects in the game.
+ * @extends DrawableObject
+ */
 class MovableObject extends DrawableObject{
     speed = 0.15;
     otherDirection = false;
@@ -7,6 +11,9 @@ class MovableObject extends DrawableObject{
     lastHit = 0;
     isFalling = false;
 
+    /**
+     * Applies gravity to the movable object.
+     */
     applyGravity(){
         setInterval(() => {
             if (gamePaused) return;
@@ -20,6 +27,9 @@ class MovableObject extends DrawableObject{
         }, 1000/25);
     };
 
+    /**
+     * Resets the fall status and vertically positions the object when landing.
+     */
     resetFallStatus() {
         if (this.y >= 180 && !(this instanceof ThrowableObject)) {
             this.y = 180;
@@ -28,6 +38,10 @@ class MovableObject extends DrawableObject{
         }
     }
 
+    /**
+     * Checks if the object is currently above ground level.
+     * @returns {boolean} True if above ground.
+     */
     isAboveGround(){
         if(this instanceof ThrowableObject){
             return true;
@@ -37,6 +51,11 @@ class MovableObject extends DrawableObject{
     };
 
     
+    /**
+     * Checks for a collision with another object.
+     * @param {MovableObject} mo - The object to check collision against.
+     * @returns {boolean} True if colliding.
+     */
     isColliding(mo){
         return this.x + this.width - this.offset.right > mo.x + mo.offset.left &&
         this.y + this.height - this.offset.bottom > mo.y + mo.offset.top &&
@@ -44,6 +63,9 @@ class MovableObject extends DrawableObject{
         this.y + this.offset.top < mo.y + mo.height - mo.offset.bottom;
     }
 
+    /**
+     * Reduces object energy when hit.
+     */
     hit(){
         if (this.isHurt()) return;
         this.energy -= 20;
@@ -53,23 +75,41 @@ class MovableObject extends DrawableObject{
             this.lastHit = new Date().getTime();
         }
     }
+    /**
+     * Checks if the object is currently in a hurt state.
+     * @returns {boolean} True if hurt.
+     */
     isHurt(){
         let timepassed = new Date().getTime() - this.lastHit; // Time in ms
         timepassed = timepassed / 1000; // Time in s
         return timepassed < 0.5; // 0.5 second hurt status
     }
+    /**
+     * Checks if the object's energy is zero.
+     * @returns {boolean} True if dead.
+     */
     isDead(){
         return this.energy == 0;
     }
 
+    /**
+     * Moves the object to the right by its speed.
+     */
     moveRight(){
         this.x += this.speed;
     };
 
+    /**
+     * Moves the object to the left by its speed.
+     */
     moveLeft(){
         this.x -= this.speed;
     };
 
+    /**
+     * Plays an animation cycle through an array of images.
+     * @param {Array<string>} images - The array of image paths.
+     */
     playAnimation(images){
             let i = this.currentImage % images.length;
             let path = images[i];
@@ -77,6 +117,9 @@ class MovableObject extends DrawableObject{
             this.currentImage++;
     }
 
+    /**
+     * Applies an upward vertical speed.
+     */
     jump(){
         this.speedY = 20;
     }

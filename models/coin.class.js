@@ -1,3 +1,7 @@
+/**
+ * Class representing a collectable coin.
+ * @extends MovableObject
+ */
 class Coin extends MovableObject {
 
     IMAGES = [
@@ -10,6 +14,12 @@ class Coin extends MovableObject {
         left: 45,
         right: 45
     };
+    /**
+     * Creates an instance of a coin on the ground.
+     * @param {number} x - The x-coordinate.
+     * @param {number} y - The y-coordinate.
+     * @constructor
+     */
     constructor(x, y) {
         super();
         this.loadImage('img/8_coin/coin_1.png');
@@ -21,6 +31,9 @@ class Coin extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Animates the coin by alternating its images.
+     */
     animate() {
         setInterval(() => {
             this.playAnimation(this.IMAGES);

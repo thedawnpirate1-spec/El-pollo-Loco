@@ -1,3 +1,7 @@
+/**
+ * Class representing a normal enemy chicken.
+ * @extends MovableObject
+ */
 class Chicken extends MovableObject{
     height = 70;
     width = 70;
@@ -15,6 +19,10 @@ class Chicken extends MovableObject{
     ];
     IMAGE_DEAD = 'img/3_enemies_chicken/chicken_normal/2_dead/dead.png';
     
+    /**
+     * Creates an instance of a normal chicken.
+     * @constructor
+     */
     constructor(){
         super();
         this.loadImage("img/3_enemies_chicken/chicken_normal/1_walk/1_w.png");
@@ -27,6 +35,9 @@ class Chicken extends MovableObject{
 
     }
 
+    /**
+     * Handles damage taken by the chicken.
+     */
     hit() {
         super.hit();
         if (this.isDead()) {
@@ -34,6 +45,9 @@ class Chicken extends MovableObject{
         }
     }
 
+    /**
+     * Starts the movement and animation intervals.
+     */
     animate(){
         setInterval(() => {
             if (gamePaused) return;

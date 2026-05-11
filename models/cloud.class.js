@@ -1,8 +1,16 @@
+/**
+ * Class representing a moving background cloud.
+ * @extends MovableObject
+ */
 class Cloud extends MovableObject{
     y=50;
     height = 250;
     width = 500;
     speed = 0.5;
+    /**
+     * Creates an instance of a cloud.
+     * @constructor
+     */
     constructor(){
         super();
         let cloudImages = [
@@ -15,6 +23,9 @@ class Cloud extends MovableObject{
         this.animate();
     }
 
+    /**
+     * Starts the cloud movement to the left.
+     */
     animate() {
         setInterval(() => {
             if (gamePaused) return;

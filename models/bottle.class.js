@@ -1,3 +1,7 @@
+/**
+ * Class representing a collectable salsa bottle.
+ * @extends MovableObject
+ */
 class Bottle extends MovableObject {
 
     IMAGES = [
@@ -12,6 +16,11 @@ class Bottle extends MovableObject {
         right: 25
     };
 
+    /**
+     * Creates an instance of a salsa bottle on the ground.
+     * @param {number} x - The x-coordinate.
+     * @param {number} y - The y-coordinate.
+     */
     constructor(x, y) {
         super();
         this.loadImage('img/6_salsa_bottle/1_salsa_bottle_on_ground.png');
@@ -23,6 +32,9 @@ class Bottle extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Animates the bottle by alternating its images.
+     */
     animate() {
         setInterval(() => {
             this.playAnimation(this.IMAGES);

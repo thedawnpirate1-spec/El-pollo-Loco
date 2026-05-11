@@ -1,3 +1,6 @@
+/**
+ * Class representing the game world and its logic.
+ */
 class World {
     character;
     level = level1;
@@ -14,6 +17,12 @@ class World {
 
     isGameOver = false;
 
+    /**
+     * Creates the game world instance.
+     * @param {HTMLCanvasElement} canvas - The canvas element.
+     * @param {KeyBoard} keyboard - The keyboard instance for controls.
+     * @constructor
+     */
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
@@ -28,10 +37,16 @@ class World {
         this.run();
     }
 
+    /**
+     * Sets the world reference in the character.
+     */
     setWorld(){
         this.character.world = this;
     }
 
+    /**
+     * Starts the main game loop checking collisions and status.
+     */
     run(){
         setInterval(() => {
             if (gamePaused) return;
@@ -42,6 +57,9 @@ class World {
         }, 50);
     }
     
+    /**
+     * Checks the win/loss status of the game.
+     */
     checkGameStatus() {
         if (this.isGameOver) return;
         this.checkDeath();
@@ -122,6 +140,9 @@ class World {
         this.keyboard.D = false;
         this.lastThrowTime = new Date().getTime();
     }
+    /**
+     * Checks for all object collisions in the game.
+     */
     checkCollisions() {
         this.checkCoinCollisions();
         this.checkBottleCollisions();

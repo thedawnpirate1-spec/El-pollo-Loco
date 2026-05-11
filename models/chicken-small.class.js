@@ -1,3 +1,7 @@
+/**
+ * Class representing a small enemy chicken.
+ * @extends MovableObject
+ */
 class ChickenSmall extends MovableObject {
     height = 50;
     width = 50;
@@ -16,6 +20,10 @@ class ChickenSmall extends MovableObject {
         right: 10
     };
 
+    /**
+     * Creates an instance of ChickenSmall.
+     * @constructor
+     */
     constructor() {
         super();
         this.loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
@@ -26,6 +34,9 @@ class ChickenSmall extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Handles damage taken by the small chicken.
+     */
     hit() {
         super.hit();
         if (this.isDead()) {
@@ -33,6 +44,9 @@ class ChickenSmall extends MovableObject {
         }
     }
 
+    /**
+     * Starts the movement and animation intervals.
+     */
     animate() {
         setInterval(() => {
             if (gamePaused) return;

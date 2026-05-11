@@ -22,12 +22,18 @@ const LOSE_IMAGES = [
     'img/You won, you lost/You lost.png'
 ];
 
+/**
+ * Initializes the application setup.
+ */
 function init(){
     canvas = document.getElementById('canvas');
     preloadSounds();
     loadMuteState();
 }
 
+/**
+ * Preloads all required audio files.
+ */
 function preloadSounds() {
     audioHub.loadSounds([
         'img/sounds/character/characterRun.mp3',
@@ -45,6 +51,9 @@ function preloadSounds() {
     ]);
 }
 
+/**
+ * Loads the mute state from local storage.
+ */
 function loadMuteState() {
     let muted = localStorage.getItem('isMuted');
     if (muted === 'true') {
@@ -53,12 +62,26 @@ function loadMuteState() {
     }
 }
 
+/**
+ * Starts the game logic and world creation.
+ */
 function startGame() {
     hideAllScreens();
     document.getElementById('gameUI').classList.remove('d-none');
     document.getElementById('infoBtn').classList.add('d-none');
     gamePaused = false;
     
+    checkMobileFullscreen();
+
+    initLevel(); 
+    world = new World(canvas, keyboard);
+    audioHub.playSound('img/sounds/game/gameStart.mp3');
+}
+
+/**
+ * Checks and requests fullscreen on mobile devices.
+ */
+function checkMobileFullscreen() {
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
         let container = document.querySelector('.game-container');
         if (!document.fullscreenElement && container.requestFullscreen) {
@@ -67,12 +90,11 @@ function startGame() {
             });
         }
     }
-
-    initLevel(); 
-    world = new World(canvas, keyboard);
-    audioHub.playSound('img/sounds/game/gameStart.mp3');
 }
 
+/**
+ * Hides all UI overlay screens.
+ */
 function hideAllScreens() {
     document.getElementById('startScreen').classList.add('d-none');
     document.getElementById('gameOverScreen').classList.add('d-none');
@@ -81,6 +103,9 @@ function hideAllScreens() {
     document.getElementById('controlsScreen').classList.add('d-none');
 }
 
+/**
+ * Opens the controls screen.
+ */
 function openControls() {
     document.getElementById('controlsScreen').classList.remove('d-none');
 }
@@ -167,53 +192,22 @@ function clearAllIntervals() {
 }
 
 window.addEventListener('keydown', (event) =>{
-    if(event.keyCode ==  32){
-        keyboard.SPACE = true;
-    }
-
-    if(event.keyCode == 37){
-        keyboard.LEFT = true;
-    }
-
-    if(event.keyCode == 39){       
-        keyboard.RIGHT = true;
-    }
-
-    if(event.keyCode == 38){
-        keyboard.UP = true;
-    }
-
-    if(event.keyCode == 40){
-        keyboard.DOWN = true;
-    }
-    if(event.keyCode == 68){
-        keyboard.D = true;
-    }
-    if(event.keyCode == 80 || event.keyCode == 27){
-        togglePause();
-    }
+    if(event.keyCode == 32) keyboard.SPACE = true;
+    if(event.keyCode == 37) keyboard.LEFT = true;
+    if(event.keyCode == 39) keyboard.RIGHT = true;
+    if(event.keyCode == 38) keyboard.UP = true;
+    if(event.keyCode == 40) keyboard.DOWN = true;
+    if(event.keyCode == 68) keyboard.D = true;
+    if(event.keyCode == 80 || event.keyCode == 27) togglePause();
 });
 
 window.addEventListener('keyup', (event) =>{
-    if(event.keyCode ==  32){
-        keyboard.SPACE = false;
-    }
-    if(event.keyCode == 37){
-        keyboard.LEFT = false;
-    }
-        
-    if(event.keyCode == 39){       
-        keyboard.RIGHT = false;
-    }
-    if(event.keyCode == 38){
-        keyboard.UP = false;
-    }
-    if(event.keyCode == 40){
-        keyboard.DOWN = false;
-    }
-    if(event.keyCode == 68){
-        keyboard.D = false;
-    }
+    if(event.keyCode == 32) keyboard.SPACE = false;
+    if(event.keyCode == 37) keyboard.LEFT = false;
+    if(event.keyCode == 39) keyboard.RIGHT = false;
+    if(event.keyCode == 38) keyboard.UP = false;
+    if(event.keyCode == 40) keyboard.DOWN = false;
+    if(event.keyCode == 68) keyboard.D = false;
 });
 
 window.addEventListener('resize', () => {

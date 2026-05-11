@@ -1,3 +1,7 @@
+/**
+ * Class representing the main playable character.
+ * @extends MovableObject
+ */
 class Character extends MovableObject{
     height = 230;
     width = 120;
@@ -77,6 +81,10 @@ class Character extends MovableObject{
 
     lastActionTime = 0;
 
+    /**
+     * Creates an instance of Character.
+     * @constructor
+     */
     constructor() {
         super();
         this.loadImage('img/2_character_pepe/2_walk/W-21.png');
@@ -91,6 +99,9 @@ class Character extends MovableObject{
         this.animate();
     }
 
+    /**
+     * Starts the animation and movement intervals for the character.
+     */
     animate() {
         setInterval(() => {
             if (gamePaused) return;
@@ -102,6 +113,9 @@ class Character extends MovableObject{
         }, 50);
     }
 
+    /**
+     * Increments the collected coins amount.
+     */
     collectCoin() {
         this.coins += 20;
         if (this.coins > 100) {
@@ -109,6 +123,9 @@ class Character extends MovableObject{
         }
     }
 
+    /**
+     * Increments the collected bottles amount.
+     */
     collectBottle() {
         this.bottles += 20;
         if (this.bottles > 100) {
@@ -116,6 +133,9 @@ class Character extends MovableObject{
         }
     }
 
+    /**
+     * Handles keyboard input and character movement logic.
+     */
     handleMovement() {
         if (!this.world || !this.world.keyboard || this.isDead()) return;
         
@@ -148,16 +168,25 @@ class Character extends MovableObject{
         this.checkActivity();
     }
 
+    /**
+     * Executes movement to the right and updates direction.
+     */
     moveCharRight() {
         this.otherDirection = false;
         this.moveRight();
     }
 
+    /**
+     * Executes movement to the left and updates direction.
+     */
     moveCharLeft() {
         this.moveLeft();
         this.otherDirection = true;
     }
 
+    /**
+     * Records the last action time to manage idle states.
+     */
     checkActivity() {
         let kb = this.world.keyboard;
         if (kb.RIGHT || kb.LEFT || kb.SPACE || kb.D) {
@@ -165,6 +194,9 @@ class Character extends MovableObject{
         }
     }
 
+    /**
+     * Handles the visual state animations based on character status.
+     */
     handleStateAnimations() {
         if (this.isDead()) this.playDeadAnimation();
         else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
@@ -184,12 +216,18 @@ class Character extends MovableObject{
         }
     }
 
+    /**
+     * Handles animations when the character is on the ground.
+     */
     handleGroundAnimations() {
         let kb = this.world.keyboard;
         if (kb && (kb.RIGHT || kb.LEFT)) this.playAnimation(this.IMAGES_WALKING);
         else this.handleIdleAnimations();
     }
 
+    /**
+     * Manages idle and sleep animations based on inactivity duration.
+     */
     handleIdleAnimations() {
         let timePassed = new Date().getTime() - this.lastActionTime;
         if (timePassed > 3000) {
@@ -201,6 +239,9 @@ class Character extends MovableObject{
         }
     }
 
+    /**
+     * Plays the death animation sequence once.
+     */
     playDeadAnimation() {
         if(!this.deadAnimationStarted) {
             audioHub.playSound('img/sounds/character/characterDead.wav');
@@ -216,6 +257,9 @@ class Character extends MovableObject{
         }
     }
 
+    /**
+     * Makes the character jump by applying vertical speed.
+     */
     jump() {
         super.jump();
         this.speedY = 17.5; // Roughly 3/4 of the original jump height
@@ -223,6 +267,9 @@ class Character extends MovableObject{
         audioHub.playSound('img/sounds/character/characterJump.wav');
     }
 
+    /**
+     * Applies damage to the character and plays the hurt sound.
+     */
     hit() {
         let wasHurt = this.isHurt();
         super.hit();

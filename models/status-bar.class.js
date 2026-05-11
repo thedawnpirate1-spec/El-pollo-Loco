@@ -1,3 +1,7 @@
+/**
+ * Class representing the character health status bar in the UI.
+ * @extends DrawableObject
+ */
 class StatusBar extends DrawableObject{
     IMAGES_HEALTH = [
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/0.png',
@@ -11,6 +15,10 @@ class StatusBar extends DrawableObject{
     IMAGES_BOTTLE = [
         
     ]
+    /**
+     * Creates an instance of StatusBar for health.
+     * @constructor
+     */
     constructor(){
         super();
         this.loadImages(this.IMAGES_HEALTH);
@@ -20,12 +28,20 @@ class StatusBar extends DrawableObject{
         this.height = 60;
         this.setPercentage(100);
     }
+    /**
+     * Sets the percentage of health to update the visual bar.
+     * @param {number} percentage - The health percentage.
+     */
     setPercentage(percentage){
         this.percentage = percentage;
         let imagePath = this.IMAGES_HEALTH[this.resolveImageIndex()];
         this.img = this.imageCache[imagePath];
     }
 
+    /**
+     * Resolves the appropriate image index based on the health percentage.
+     * @returns {number} The image index to use from the IMAGES_HEALTH array.
+     */
     resolveImageIndex(){
         if(this.percentage == 100){
             return 5;

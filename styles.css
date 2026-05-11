@@ -99,10 +99,6 @@ canvas{
     overflow-y: auto;
 }
 
-.start-content {
-    margin-top: 400px;
-}
-
 .controls-content h2, .turn-device-content h2 {
     margin-top: 0;
     color: #ff9900;
@@ -139,6 +135,8 @@ button:hover {
 #startScreen {
     background-image: url('img/9_intro_outro_screens/start/startscreen_1.png');
     animation: startScreenAnim 4s infinite;
+    align-items: flex-end;
+    padding-bottom: 1%;
 }
 
 #winScreen, #gameOverScreen {
@@ -367,8 +365,8 @@ button:hover {
 
     .game-container {
         width: 100vw;
-        height: 100vh;
-        max-width: calc(100vh * 1.5);
+        height: calc(100vh - 40px);
+        max-width: calc((100vh - 40px) * 1.5);
         max-height: calc(100vw / 1.5);
     }
 

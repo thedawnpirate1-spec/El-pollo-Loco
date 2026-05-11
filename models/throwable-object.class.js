@@ -1,3 +1,7 @@
+/**
+ * Class representing a throwable object (salsa bottle).
+ * @extends MovableObject
+ */
 class ThrowableObject extends MovableObject {
 
 
@@ -21,6 +25,13 @@ class ThrowableObject extends MovableObject {
     moveInterval;
     animInterval;
 
+    /**
+     * Creates a throwable bottle object.
+     * @param {number} x - The starting x-coordinate.
+     * @param {number} y - The starting y-coordinate.
+     * @param {boolean} direction - The direction to throw (true for left, false for right).
+     * @constructor
+     */
     constructor(x, y, direction) {
         super();
         this.loadImage(this.IMAGES_ROTATION[0]);
@@ -34,7 +45,9 @@ class ThrowableObject extends MovableObject {
         this.throw();
     }
 
-    /** Initiates the throwing mechanics and rotation */
+    /**
+     * Initiates the throwing mechanics and rotation.
+     */
     throw() {
         this.speedY = 15;
         this.applyGravity();
@@ -42,6 +55,9 @@ class ThrowableObject extends MovableObject {
         this.startAnimationInterval();
     }
 
+    /**
+     * Starts the horizontal and vertical movement interval for the thrown object.
+     */
     startMovementInterval() {
         this.moveInterval = setInterval(() => {
             if (gamePaused || this.hasSplashed) return;
@@ -50,6 +66,9 @@ class ThrowableObject extends MovableObject {
         }, 25);
     }
 
+    /**
+     * Updates the horizontal position based on the throw direction.
+     */
     updatePosition() {
         if (this.otherDirection) {
             this.x -= 8;
@@ -58,6 +77,9 @@ class ThrowableObject extends MovableObject {
         }
     }
 
+    /**
+     * Checks if the bottle has hit the ground and triggers splash.
+     */
     checkGroundContact() {
         if (this.y >= 360) {
             this.y = 360;
@@ -65,6 +87,9 @@ class ThrowableObject extends MovableObject {
         }
     }
 
+    /**
+     * Starts the rotation animation interval.
+     */
     startAnimationInterval() {
         this.animInterval = setInterval(() => {
             if (gamePaused) return;
@@ -72,7 +97,9 @@ class ThrowableObject extends MovableObject {
         }, 50);
     }
 
-    /** Plays splash animation and stops bottle movement */
+    /**
+     * Plays the splash animation and stops bottle movement.
+     */
     splash() {
         this.hasSplashed = true;
         audioHub.playSound('img/sounds/throwable/bottleBreak.mp3');

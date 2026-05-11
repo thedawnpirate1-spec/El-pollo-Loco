@@ -1,3 +1,7 @@
+/**
+ * Class representing the Endboss enemy.
+ * @extends MovableObject
+ */
 class Endboss extends MovableObject {
     height = 340;
     width = 270;
@@ -51,6 +55,10 @@ class Endboss extends MovableObject {
     deadAnimationStarted = false;
     deadAnimationIndex = 0;
 
+    /**
+     * Creates an instance of Endboss.
+     * @constructor
+     */
     constructor() {
         super();
         this.loadImage(this.IMAGES_ALERT[0]);
@@ -63,13 +71,18 @@ class Endboss extends MovableObject {
         this.animate();
     }
 
-    /** Starts the endboss animation and movement intervals */
+    /**
+     * Starts the endboss animation and movement intervals.
+     */
     animate() {
         this.startMovementInterval();
         this.startAnimationInterval();
         this.startAttackTimer();
     }
 
+    /**
+     * Starts the movement interval for the endboss.
+     */
     startMovementInterval() {
         setInterval(() => {
             if (gamePaused) return;
@@ -77,6 +90,9 @@ class Endboss extends MovableObject {
         }, 1000 / 60);
     }
 
+    /**
+     * Starts the animation interval for the endboss.
+     */
     startAnimationInterval() {
         setInterval(() => {
             if (gamePaused) return;
@@ -84,6 +100,9 @@ class Endboss extends MovableObject {
         }, 200);
     }
 
+    /**
+     * Starts the attack timer interval for the endboss.
+     */
     startAttackTimer() {
         setInterval(() => {
             if (gamePaused) return;
@@ -96,7 +115,9 @@ class Endboss extends MovableObject {
         }, 4000); // Trigger attack every 4 seconds
     }
 
-    /** Handles the horizontal movement of the endboss */
+    /**
+     * Handles the horizontal movement of the endboss.
+     */
     handleMovement() {
         if (this.hadFirstContact && !this.isDead() && !this.isAttacking) {
             this.moveLeft();
@@ -104,7 +125,9 @@ class Endboss extends MovableObject {
         }
     }
 
-    /** Overrides hit to increase speed as health decreases */
+    /**
+     * Overrides hit to increase speed as health decreases.
+     */
     hit() {
         super.hit();
         if (this.energy <= 100 && this.energy > 60) {
@@ -116,7 +139,9 @@ class Endboss extends MovableObject {
         }
     }
 
-    /** Manages the visual state animations of the endboss */
+    /**
+     * Manages the visual state animations of the endboss.
+     */
     handleAnimations() {
         if (this.isDead()) {
             this.playDeadAnimation();
@@ -131,7 +156,9 @@ class Endboss extends MovableObject {
         }
     }
 
-    /** Plays the dead animation sequence only once */
+    /**
+     * Plays the dead animation sequence only once.
+     */
     playDeadAnimation() {
         if (!this.deadAnimationStarted) {
             this.deadAnimationIndex = 0;
