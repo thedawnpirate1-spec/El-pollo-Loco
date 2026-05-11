@@ -43,19 +43,12 @@ class Character extends MovableObject{
     coins = 0;
     bottles = 0;
 
-    collectCoin() {
-        this.coins += 20;
-        if (this.coins > 100) {
-            this.coins = 100;
-        }
-    }
-
-    collectBottle() {
-        this.bottles += 20;
-        if (this.bottles > 100) {
-            this.bottles = 100;
-        }
-    }
+    offset = {
+        top: 120,
+        left: 30,
+        right: 30,
+        bottom: 15
+    };
 
     IMAGES_IDLE = [
         'img/2_character_pepe/1_idle/idle/I-1.png',
@@ -107,6 +100,20 @@ class Character extends MovableObject{
             if (gamePaused) return;
             this.handleStateAnimations();
         }, 50);
+    }
+
+    collectCoin() {
+        this.coins += 20;
+        if (this.coins > 100) {
+            this.coins = 100;
+        }
+    }
+
+    collectBottle() {
+        this.bottles += 20;
+        if (this.bottles > 100) {
+            this.bottles = 100;
+        }
     }
 
     handleMovement() {
@@ -208,13 +215,6 @@ class Character extends MovableObject{
             this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
         }
     }
-
-    offset = {
-        top: 120,
-        left: 30,
-        right: 30,
-        bottom: 15
-    };
 
     jump() {
         super.jump();
