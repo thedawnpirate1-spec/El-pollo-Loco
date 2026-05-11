@@ -5,6 +5,7 @@ class MovableObject extends DrawableObject{
     acceleration = 1;
     energy = 100;
     lastHit = 0;
+    isFalling = false;
 
     applyGravity(){
         setInterval(() => {
@@ -14,15 +15,18 @@ class MovableObject extends DrawableObject{
                 this.speedY -= this.acceleration;
                 if (this.speedY < 0) this.isFalling = true;
             } else {
-                // Reset falling speed when on ground
-                if (this.y >= 180 && !(this instanceof ThrowableObject)) {
-                    this.y = 180;
-                    this.speedY = 0;
-                    setTimeout(() => this.isFalling = false, 100); // 100ms grace period for jump attacks
-                }
+                this.resetFallStatus();
             }
         }, 1000/25);
     };
+
+    resetFallStatus() {
+        if (this.y >= 180 && !(this instanceof ThrowableObject)) {
+            this.y = 180;
+            this.speedY = 0;
+            setTimeout(() => this.isFalling = false, 100); // 100ms grace period for jump attacks
+        }
+    }
 
     isAboveGround(){
         if(this instanceof ThrowableObject){

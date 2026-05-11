@@ -47,6 +47,9 @@ class Endboss extends MovableObject {
 
     offset = { top: 60, bottom: 20, left: 40, right: 40 };
     hadFirstContact = false;
+    isAttacking = false;
+    deadAnimationStarted = false;
+    deadAnimationIndex = 0;
 
     constructor() {
         super();
@@ -62,16 +65,26 @@ class Endboss extends MovableObject {
 
     /** Starts the endboss animation and movement intervals */
     animate() {
+        this.startMovementInterval();
+        this.startAnimationInterval();
+        this.startAttackTimer();
+    }
+
+    startMovementInterval() {
         setInterval(() => {
             if (gamePaused) return;
             this.handleMovement();
         }, 1000 / 60);
+    }
+
+    startAnimationInterval() {
         setInterval(() => {
             if (gamePaused) return;
             this.handleAnimations();
         }, 200);
-        
-        // Attack timer
+    }
+
+    startAttackTimer() {
         setInterval(() => {
             if (gamePaused) return;
             if (this.hadFirstContact && !this.isDead() && !this.isHurt()) {

@@ -7,6 +7,7 @@ class EndbossBar extends DrawableObject {
         'img/7_statusbars/2_statusbar_endboss/blue/blue80.png',
         'img/7_statusbars/2_statusbar_endboss/blue/blue100.png'
     ];
+    percentage = 100;
 
     constructor() {
         super();
