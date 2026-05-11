@@ -161,17 +161,22 @@ class World {
     handleCoinCollection(coin, index) {
         audioHub.playSound('img/sounds/collectibles/collectSound.wav');
         this.character.collectCoin();
-        if (this.character.coins >= 100) {
-            this.healCharacter();
-        }
+        this.checkAutoHeal();
         this.coinBar.setPercentage(this.character.coins);
         this.level.coins.splice(index, 1);
+    }
+
+    checkAutoHeal() {
+        if (this.character.coins >= 100 && this.character.energy < 180) {
+            this.healCharacter();
+        }
     }
 
     healCharacter() {
         this.character.energy = 180;
         this.character.coins = 0;
         this.statusBar.setPercentage(this.character.energy / 1.8);
+        this.coinBar.setPercentage(this.character.coins);
     }
 
     checkBottleCollisions() {
@@ -201,6 +206,7 @@ class World {
         } else if (!enemy.isDead()) {
             this.character.hit();
             this.statusBar.setPercentage(this.character.energy / 1.8);
+            this.checkAutoHeal();
         }
     }
 
@@ -208,6 +214,7 @@ class World {
         if (!enemy.isDead()) {
             this.character.hit(200);
             this.statusBar.setPercentage(this.character.energy / 1.8);
+            this.checkAutoHeal();
         }
     }
 

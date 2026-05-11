@@ -29,15 +29,14 @@ class Character extends MovableObject{
         'img/2_character_pepe/2_walk/W-26.png'
     ]
     IMAGES_JUMPING =[
-        'img/2_character_pepe/3_jump/J-31.png',
-        'img/2_character_pepe/3_jump/J-32.png',
-        'img/2_character_pepe/3_jump/J-33.png',
-        'img/2_character_pepe/3_jump/J-34.png',
-        'img/2_character_pepe/3_jump/J-35.png',
-        'img/2_character_pepe/3_jump/J-36.png',
-        'img/2_character_pepe/3_jump/J-37.png',
+        'img/2_character_pepe/3_jump/J-39.png',
         'img/2_character_pepe/3_jump/J-38.png',
-        'img/2_character_pepe/3_jump/J-39.png'
+        'img/2_character_pepe/3_jump/J-37.png',
+        'img/2_character_pepe/3_jump/J-36.png',
+        'img/2_character_pepe/3_jump/J-35.png',
+        'img/2_character_pepe/3_jump/J-34.png',
+        'img/2_character_pepe/3_jump/J-33.png',
+        'img/2_character_pepe/3_jump/J-32.png'
     ]
     IMAGES_DEAD = [
         'img/2_character_pepe/5_dead/D-51.png',
@@ -137,11 +136,31 @@ class Character extends MovableObject{
      */
     handleMovement() {
         if (!this.world || !this.world.keyboard || this.isDead()) return;
+        
+        this.updateAcceleration();
+        let isWalking = this.processKeyboardInput();
+        this.handleMovementAudio(isWalking);
+        
+        this.world.camera_x = -this.x + 100;
+        this.checkActivity();
+    }
+
+    /**
+     * Updates the acceleration based on jumping state.
+     */
+    updateAcceleration() {
         if (this.speedY < 0 && this.isAboveGround()) {
             this.acceleration = 2.5; 
         } else if (!this.isAboveGround()) {
             this.acceleration = 1; 
         }
+    }
+
+    /**
+     * Processes left, right, and jump inputs.
+     * @returns {boolean} True if the character is walking horizontally.
+     */
+    processKeyboardInput() {
         let isWalking = false;
         if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) {
             this.moveCharRight();
@@ -151,15 +170,22 @@ class Character extends MovableObject{
             this.moveCharLeft();
             isWalking = true;
         }
-        if (this.world.keyboard.SPACE && !this.isAboveGround()) this.jump();
-        
+        if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+            this.jump();
+        }
+        return isWalking;
+    }
+
+    /**
+     * Handles the running audio depending on movement state.
+     * @param {boolean} isWalking - Whether the character is walking.
+     */
+    handleMovementAudio(isWalking) {
         if (!isWalking || this.isAboveGround()) {
             audioHub.pauseSound('img/sounds/character/characterRun.mp3');
         } else {
             audioHub.playSound('img/sounds/character/characterRun.mp3');
         }
-        this.world.camera_x = -this.x + 100;
-        this.checkActivity();
     }
 
     /**
@@ -196,7 +222,7 @@ class Character extends MovableObject{
         else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
         else if (this.isAboveGround()) {
             if (this.jumpAnimationIndex === undefined) this.jumpAnimationIndex = 0;
-            let frame = Math.floor(this.jumpAnimationIndex / 2); // 2 ticks per frame -> 100ms per frame
+            let frame = this.jumpAnimationIndex; 
             if (frame < this.IMAGES_JUMPING.length) {
                 this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
                 this.jumpAnimationIndex++;
@@ -224,7 +250,7 @@ class Character extends MovableObject{
      */
     handleIdleAnimations() {
         let timePassed = new Date().getTime() - this.lastActionTime;
-        if (timePassed > 3000) {
+        if (timePassed > 7000) {
             this.playAnimation(this.IMAGES_SLEEP);
             if (!this.isAboveGround()) audioHub.playSound('img/sounds/character/characterSnoring.mp3');
         } else {
