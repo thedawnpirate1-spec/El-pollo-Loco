@@ -47,7 +47,8 @@ function preloadSounds() {
         'img/sounds/collectibles/bottleCollectSound.wav',
         'img/sounds/throwable/bottleBreak.mp3',
         'img/sounds/endboss/endbossApproach.wav',
-        'img/sounds/game/gameStart.mp3'
+        'img/sounds/game/gameStart.mp3',
+        'img/sounds/world_sound/Camino_de_Sol.mp3'
     ]);
 }
 
@@ -76,6 +77,7 @@ function startGame() {
     initLevel(); 
     world = new World(canvas, keyboard);
     audioHub.playSound('img/sounds/game/gameStart.mp3');
+    audioHub.playSound('img/sounds/world_sound/Camino_de_Sol.mp3');
 }
 
 /**
@@ -150,7 +152,14 @@ function togglePause() {
         audioHub.pauseAllSounds();
     } else {
         screen.classList.add('d-none');
-        audioHub.playSound('img/sounds/game/gameStart.mp3');
+        
+        let endboss = world ? world.level.enemies.find(e => e instanceof Endboss) : null;
+        if (world && !world.isGameOver) {
+            audioHub.playSound('img/sounds/world_sound/Camino_de_Sol.mp3');
+        }
+        if (endboss && endboss.hadFirstContact && !endboss.isDead()) {
+            audioHub.playSound('img/sounds/endboss/endbossApproach.wav');
+        }
     }
 }
 

@@ -77,7 +77,12 @@ class AudioHub{
      * @returns {boolean} True if the sound is a looping sound, false otherwise.
      */
     isLoopingSound(path) {
-        return ['img/sounds/endboss/endbossApproach.wav', 'img/sounds/character/characterRun.mp3', 'img/sounds/character/characterSnoring.mp3'].includes(path);
+        return [
+            'img/sounds/endboss/endbossApproach.wav', 
+            'img/sounds/character/characterRun.mp3', 
+            'img/sounds/character/characterSnoring.mp3',
+            'img/sounds/world_sound/Camino_de_Sol.mp3'
+        ].includes(path);
     }
 
     /**

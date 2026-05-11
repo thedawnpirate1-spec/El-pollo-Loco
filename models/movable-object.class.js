@@ -31,8 +31,8 @@ class MovableObject extends DrawableObject{
      * Resets the fall status and vertically positions the object when landing.
      */
     resetFallStatus() {
-        if (this.y >= 180 && !(this instanceof ThrowableObject)) {
-            this.y = 180;
+        if (this.y >= 200 && !(this instanceof ThrowableObject)) {
+            this.y = 200;
             this.speedY = 0;
             setTimeout(() => this.isFalling = false, 100); // 100ms grace period for jump attacks
         }
@@ -46,7 +46,7 @@ class MovableObject extends DrawableObject{
         if(this instanceof ThrowableObject){
             return true;
         }else{
-            return this.y <180;
+            return this.y < 200;
         }
     };
 
@@ -65,10 +65,11 @@ class MovableObject extends DrawableObject{
 
     /**
      * Reduces object energy when hit.
+     * @param {number} damage - The amount of damage to take (default 20).
      */
-    hit(){
+    hit(damage = 20){
         if (this.isHurt()) return;
-        this.energy -= 20;
+        this.energy -= damage;
         if(this.energy < 0){
             this.energy = 0;
         }else{

@@ -5,42 +5,8 @@
 class Character extends MovableObject{
     height = 230;
     width = 120;
-    y = 200;
+    y = 400;
     energy = 180;
-    IMAGES_WALKING = [
-            'img/2_character_pepe/2_walk/W-21.png',
-            'img/2_character_pepe/2_walk/W-22.png',
-            'img/2_character_pepe/2_walk/W-23.png',
-            'img/2_character_pepe/2_walk/W-24.png',
-            'img/2_character_pepe/2_walk/W-25.png',
-            'img/2_character_pepe/2_walk/W-26.png'
-        ]
-        IMAGES_JUMPING =[
-            'img/2_character_pepe/3_jump/J-31.png',
-            'img/2_character_pepe/3_jump/J-32.png',
-            'img/2_character_pepe/3_jump/J-33.png',
-            'img/2_character_pepe/3_jump/J-34.png',
-            'img/2_character_pepe/3_jump/J-35.png',
-            'img/2_character_pepe/3_jump/J-36.png',
-            'img/2_character_pepe/3_jump/J-37.png',
-            'img/2_character_pepe/3_jump/J-38.png',
-            'img/2_character_pepe/3_jump/J-39.png'
-        ]
-        IMAGES_DEAD = [
-            'img/2_character_pepe/5_dead/D-51.png',
-            'img/2_character_pepe/5_dead/D-52.png',
-            'img/2_character_pepe/5_dead/D-53.png',
-            'img/2_character_pepe/5_dead/D-54.png',
-            'img/2_character_pepe/5_dead/D-55.png',
-            'img/2_character_pepe/5_dead/D-56.png',
-            'img/2_character_pepe/5_dead/D-57.png' 
-        ];
-        IMAGES_HURT =[
-            'img/2_character_pepe/4_hurt/H-41.png',
-            'img/2_character_pepe/4_hurt/H-42.png',
-            'img/2_character_pepe/4_hurt/H-43.png'
-        ]
-
     world;
     currentImage = 0;
     speed = 10;
@@ -54,6 +20,39 @@ class Character extends MovableObject{
         bottom: 15
     };
 
+    IMAGES_WALKING = [
+        'img/2_character_pepe/2_walk/W-21.png',
+        'img/2_character_pepe/2_walk/W-22.png',
+        'img/2_character_pepe/2_walk/W-23.png',
+        'img/2_character_pepe/2_walk/W-24.png',
+        'img/2_character_pepe/2_walk/W-25.png',
+        'img/2_character_pepe/2_walk/W-26.png'
+    ]
+    IMAGES_JUMPING =[
+        'img/2_character_pepe/3_jump/J-31.png',
+        'img/2_character_pepe/3_jump/J-32.png',
+        'img/2_character_pepe/3_jump/J-33.png',
+        'img/2_character_pepe/3_jump/J-34.png',
+        'img/2_character_pepe/3_jump/J-35.png',
+        'img/2_character_pepe/3_jump/J-36.png',
+        'img/2_character_pepe/3_jump/J-37.png',
+        'img/2_character_pepe/3_jump/J-38.png',
+        'img/2_character_pepe/3_jump/J-39.png'
+    ]
+    IMAGES_DEAD = [
+        'img/2_character_pepe/5_dead/D-51.png',
+        'img/2_character_pepe/5_dead/D-52.png',
+        'img/2_character_pepe/5_dead/D-53.png',
+        'img/2_character_pepe/5_dead/D-54.png',
+        'img/2_character_pepe/5_dead/D-55.png',
+        'img/2_character_pepe/5_dead/D-56.png',
+        'img/2_character_pepe/5_dead/D-57.png' 
+    ];
+    IMAGES_HURT =[
+        'img/2_character_pepe/4_hurt/H-41.png',
+        'img/2_character_pepe/4_hurt/H-42.png',
+        'img/2_character_pepe/4_hurt/H-43.png'
+    ]
     IMAGES_IDLE = [
         'img/2_character_pepe/1_idle/idle/I-1.png',
         'img/2_character_pepe/1_idle/idle/I-2.png',
@@ -110,7 +109,7 @@ class Character extends MovableObject{
         setInterval(() => {
             if (gamePaused) return;
             this.handleStateAnimations();
-        }, 50);
+        }, 125);
     }
 
     /**
@@ -138,16 +137,12 @@ class Character extends MovableObject{
      */
     handleMovement() {
         if (!this.world || !this.world.keyboard || this.isDead()) return;
-        
-        // Fall faster when moving downwards
         if (this.speedY < 0 && this.isAboveGround()) {
             this.acceleration = 2.5; 
         } else if (!this.isAboveGround()) {
             this.acceleration = 1; 
         }
-
         let isWalking = false;
-        
         if (this.world.keyboard.RIGHT && this.x <= this.world.level.level_end_x) {
             this.moveCharRight();
             isWalking = true;
@@ -163,7 +158,6 @@ class Character extends MovableObject{
         } else {
             audioHub.playSound('img/sounds/character/characterRun.mp3');
         }
-        
         this.world.camera_x = -this.x + 100;
         this.checkActivity();
     }
@@ -269,10 +263,11 @@ class Character extends MovableObject{
 
     /**
      * Applies damage to the character and plays the hurt sound.
+     * @param {number} damage - The amount of damage to take (default 20).
      */
-    hit() {
+    hit(damage = 20) {
         let wasHurt = this.isHurt();
-        super.hit();
+        super.hit(damage);
         if (!wasHurt && this.isHurt() && !this.isDead()) {
             audioHub.playSound('img/sounds/character/characterDamage.mp3');
         }

@@ -206,7 +206,7 @@ class World {
 
     handleBossContact(enemy) {
         if (!enemy.isDead()) {
-            this.character.hit();
+            this.character.hit(200);
             this.statusBar.setPercentage(this.character.energy / 1.8);
         }
     }

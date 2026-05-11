@@ -8,6 +8,12 @@ class Endboss extends MovableObject {
     y = 100;
     speed = 1.5;
     energy = 100;
+    offset = { top: 60, bottom: 20, left: 40, right: 40 };
+    hadFirstContact = false;
+    isAttacking = false;
+    deadAnimationStarted = false;
+    deadAnimationIndex = 0;
+
     IMAGES_WALKING = [
         'img/4_enemie_boss_chicken/1_walk/G1.png',
         'img/4_enemie_boss_chicken/1_walk/G2.png',
@@ -49,12 +55,7 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
 
-    offset = { top: 60, bottom: 20, left: 40, right: 40 };
-    hadFirstContact = false;
-    isAttacking = false;
-    deadAnimationStarted = false;
-    deadAnimationIndex = 0;
-
+    
     /**
      * Creates an instance of Endboss.
      * @constructor
