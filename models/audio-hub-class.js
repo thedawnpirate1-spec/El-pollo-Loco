@@ -2,7 +2,7 @@
  * Class representing the audio management system for the game.
  */
 class AudioHub{
-    volume = 1;
+    volume = 0.3;
     isMuted = false;
     audioCache = {};
 

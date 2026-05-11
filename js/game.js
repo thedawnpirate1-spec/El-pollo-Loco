@@ -70,6 +70,10 @@ function startGame() {
     hideAllScreens();
     document.getElementById('gameUI').classList.remove('d-none');
     document.getElementById('infoBtn').classList.add('d-none');
+    
+    let impressumBtn = document.getElementById('impressumBtn');
+    if (impressumBtn) impressumBtn.classList.add('d-none');
+    
     gamePaused = false;
     
     checkMobileFullscreen();
@@ -169,6 +173,10 @@ function backToMenu() {
     document.getElementById('startScreen').classList.remove('d-none');
     document.getElementById('gameUI').classList.add('d-none');
     document.getElementById('infoBtn').classList.remove('d-none');
+    
+    let impressumBtn = document.getElementById('impressumBtn');
+    if (impressumBtn) impressumBtn.classList.remove('d-none');
+    
     audioHub.pauseAllSounds();
 }
 
