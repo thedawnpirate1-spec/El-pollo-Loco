@@ -18,6 +18,7 @@ class Chicken extends MovableObject{
     'img/3_enemies_chicken/chicken_normal/1_walk/3_w.png',
     ];
     IMAGE_DEAD = 'img/3_enemies_chicken/chicken_normal/2_dead/dead.png';
+    deadSound = 'img/sounds/chicken/chickenDead.mp3';
     
     /**
      * Creates an instance of a normal chicken.
@@ -41,7 +42,7 @@ class Chicken extends MovableObject{
     hit() {
         super.hit();
         if (this.isDead()) {
-            audioHub.playSound('img/sounds/chicken/chickenDead.mp3');
+            audioHub.playSound(this.deadSound);
         }
     }
 

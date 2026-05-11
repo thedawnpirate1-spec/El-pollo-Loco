@@ -2,7 +2,7 @@
  * Class representing a small enemy chicken.
  * @extends MovableObject
  */
-class ChickenSmall extends MovableObject {
+class ChickenSmall extends Chicken {
     height = 50;
     width = 50;
     y = 380; 
@@ -18,6 +18,7 @@ class ChickenSmall extends MovableObject {
         'img/3_enemies_chicken/chicken_small/1_walk/3_w.png'
     ];
     IMAGE_DEAD = 'img/3_enemies_chicken/chicken_small/2_dead/dead.png';
+    deadSound = 'img/sounds/chicken/chickenDead2.mp3';
 
     /**
      * Creates an instance of ChickenSmall.
@@ -30,38 +31,5 @@ class ChickenSmall extends MovableObject {
         this.loadImages([this.IMAGE_DEAD]);
         this.x = 600 + Math.random() * 4500;
         this.speed = 0.15 + Math.random() * 0.5;
-        this.animate();
-    }
-
-    /**
-     * Handles damage taken by the small chicken.
-     */
-    hit() {
-        super.hit();
-        if (this.isDead()) {
-            audioHub.playSound('img/sounds/chicken/chickenDead2.mp3');
-        }
-    }
-
-    /**
-     * Starts the movement and animation intervals.
-     */
-    animate() {
-        setInterval(() => {
-            if (gamePaused) return;
-            if (!this.isDead()) {
-                this.moveLeft();
-                this.otherDirection = false;
-            }
-        }, 1000 / 60);
-
-        setInterval(() => {
-            if (gamePaused) return;
-            if (this.isDead()) {
-                this.img = this.imageCache[this.IMAGE_DEAD];
-            } else {
-                this.playAnimation(this.IMAGE_WALKING);
-            }
-        }, 200);
     }
 }
