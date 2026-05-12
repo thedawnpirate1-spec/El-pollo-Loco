@@ -13,6 +13,7 @@ class World {
     bottleBar = new BottleBar();
     endbossBar = new EndbossBar();
     throwableObjects = [];
+    floatingTexts = [];
     lastThrowTime = 0;
 
     isGameOver = false;
@@ -152,7 +153,7 @@ class World {
 
     checkCoinCollisions() {
         this.level.coins.forEach(function(coin, index) {
-            if (this.character.isColliding(coin)) {
+            if (this.character.isColliding(coin) && this.character.coins < 100) {
                 this.handleCoinCollection(coin, index);
             }
         }, this);
@@ -161,13 +162,12 @@ class World {
     handleCoinCollection(coin, index) {
         audioHub.playSound('img/sounds/collectibles/collectSound.wav');
         this.character.collectCoin();
-        this.checkAutoHeal();
         this.coinBar.setPercentage(this.character.coins);
         this.level.coins.splice(index, 1);
     }
 
     checkAutoHeal() {
-        if (this.character.coins >= 100 && this.character.energy < 180) {
+        if (this.character.coins >= 100 && this.character.energy < 180 && !this.character.isDead()) {
             this.healCharacter();
         }
     }
@@ -177,6 +177,11 @@ class World {
         this.character.coins = 0;
         this.statusBar.setPercentage(this.character.energy / 1.8);
         this.coinBar.setPercentage(this.character.coins);
+
+        audioHub.playSound('img/sounds/heal sound/funkelndes_geraeusch.wav');
+        let textX = this.character.x + this.character.width / 2 - 80;
+        let textY = this.character.y + 50;
+        this.floatingTexts.push(new FloatingText("+ FULL HEALTH !", textX, textY));
     }
 
     checkBottleCollisions() {
@@ -298,6 +303,10 @@ class World {
         this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.level.bottles);
         this.addObjectsToMap(this.throwableObjects);
+
+        this.floatingTexts.forEach(text => text.draw(this.ctx));
+        this.floatingTexts = this.floatingTexts.filter(t => t.alpha > 0);
+
         this.ctx.translate(-this.camera_x, 0);
     }
 

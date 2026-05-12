@@ -29,14 +29,15 @@ class Character extends MovableObject{
         'img/2_character_pepe/2_walk/W-26.png'
     ]
     IMAGES_JUMPING =[
-        'img/2_character_pepe/3_jump/J-39.png',
-        'img/2_character_pepe/3_jump/J-38.png',
-        'img/2_character_pepe/3_jump/J-37.png',
-        'img/2_character_pepe/3_jump/J-36.png',
-        'img/2_character_pepe/3_jump/J-35.png',
-        'img/2_character_pepe/3_jump/J-34.png',
+        'img/2_character_pepe/3_jump/J-31.png',
+        'img/2_character_pepe/3_jump/J-32.png',
         'img/2_character_pepe/3_jump/J-33.png',
-        'img/2_character_pepe/3_jump/J-32.png'
+        'img/2_character_pepe/3_jump/J-34.png',
+        'img/2_character_pepe/3_jump/J-35.png',
+        'img/2_character_pepe/3_jump/J-36.png',
+        'img/2_character_pepe/3_jump/J-37.png',
+        'img/2_character_pepe/3_jump/J-38.png',
+        'img/2_character_pepe/3_jump/J-39.png'
     ]
     IMAGES_DEAD = [
         'img/2_character_pepe/5_dead/D-51.png',
@@ -222,10 +223,10 @@ class Character extends MovableObject{
         else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
         else if (this.isAboveGround()) {
             if (this.jumpAnimationIndex === undefined) this.jumpAnimationIndex = 0;
-            let frame = this.jumpAnimationIndex; 
+            let frame = Math.floor(this.jumpAnimationIndex); 
             if (frame < this.IMAGES_JUMPING.length) {
                 this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
-                this.jumpAnimationIndex++;
+                this.jumpAnimationIndex += 2;
             } else {
                 this.img = this.imageCache[this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1]];
             }

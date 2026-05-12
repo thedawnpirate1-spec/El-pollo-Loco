@@ -48,7 +48,8 @@ function preloadSounds() {
         'img/sounds/throwable/bottleBreak.mp3',
         'img/sounds/endboss/endbossApproach.wav',
         'img/sounds/game/gameStart.mp3',
-        'img/sounds/world_sound/Camino_de_Sol.mp3'
+        'img/sounds/world_sound/Camino_de_Sol.mp3',
+        'img/sounds/heal sound/funkelndes_geraeusch.wav'
     ]);
 }
 
