@@ -77,7 +77,7 @@ function startGame() {
     
     gamePaused = false;
     
-    checkMobileFullscreen();
+    checkMobileFullscreen('.game-container');
 
     initLevel(); 
     world = new World(canvas, keyboard);
@@ -87,14 +87,18 @@ function startGame() {
 
 /**
  * Checks and requests fullscreen on mobile devices.
+ * @param {string} selector - The CSS selector of the element.
  */
-function checkMobileFullscreen() {
+function checkMobileFullscreen(selector) {
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
-        let container = document.querySelector('.game-container');
-        if (!document.fullscreenElement && container.requestFullscreen) {
-            container.requestFullscreen().catch(err => {
-                console.log(`Error requesting fullscreen: ${err.message}`);
-            });
+        let container = document.querySelector(selector);
+        
+        if (container && !document.fullscreenElement) {
+            if (container.requestFullscreen) {
+                container.requestFullscreen().catch(err => console.log(err));
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
         }
     }
 }
