@@ -59,7 +59,7 @@ function preloadSounds() {
 function loadMuteState() {
     let muted = localStorage.getItem('isMuted');
     if (muted === 'true') {
-        audioHub.isMuted = false; // toggleMute will invert this
+        audioHub.isMuted = false;
         audioHub.toggleMute();
     }
 }

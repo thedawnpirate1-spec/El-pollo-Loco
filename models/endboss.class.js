@@ -111,9 +111,9 @@ class Endboss extends MovableObject {
                 this.isAttacking = true;
                 setTimeout(() => {
                     this.isAttacking = false;
-                }, 1600); // 8 frames * 200ms = 1600ms
+                }, 1600);
             }
-        }, 4000); // Trigger attack every 4 seconds
+        }, 4000);
     }
 
     /**
@@ -132,11 +132,11 @@ class Endboss extends MovableObject {
     hit() {
         super.hit();
         if (this.energy <= 100 && this.energy > 60) {
-            this.speed = 3.0; // Phase 2
+            this.speed = 3.0;
         } else if (this.energy <= 60 && this.energy > 20) {
-            this.speed = 4.5; // Phase 3
+            this.speed = 4.5;
         } else if (this.energy <= 20) {
-            this.speed = 7.0; // Enraged
+            this.speed = 7.0;
         }
     }
 

@@ -284,7 +284,7 @@ class Character extends MovableObject{
      */
     jump() {
         super.jump();
-        this.speedY = 17.5; // Roughly 3/4 of the original jump height
+        this.speedY = 17.5;
         this.jumpAnimationIndex = 0;
         audioHub.playSound('img/sounds/character/characterJump.wav');
     }

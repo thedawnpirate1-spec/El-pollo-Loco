@@ -170,7 +170,7 @@ class World {
     checkHealInput() {
         if (this.keyboard.H && this.character.coins >= 100 && this.character.energy < 180 && !this.character.isDead()) {
             this.healCharacter();
-            this.keyboard.H = false; // Prevent multi-trigger
+            this.keyboard.H = false;
         }
     }
 
@@ -258,7 +258,7 @@ class World {
             enemy.hit();
             this.endbossBar.setPercentage(enemy.energy);
         } else {
-            enemy.energy = 0; // Kill instant
+            enemy.energy = 0;
             if (enemy instanceof Chicken) {
                 audioHub.playSound('img/sounds/chicken/chickenDead.mp3');
             } else if (enemy instanceof ChickenSmall) {

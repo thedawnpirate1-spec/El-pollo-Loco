@@ -21,7 +21,7 @@ class CoinBar extends DrawableObject {
         super();
         this.loadImages(this.IMAGES);
         this.x = 40;
-        this.y = 50; // Position below health bar
+        this.y = 50;
         this.width = 200;
         this.height = 60;
         this.setPercentage(0);

@@ -94,7 +94,7 @@ class AudioHub{
         if (!isLoop) {
             this.playClonedSound(audio);
         } else {
-            if (!audio.paused) return; // Don't replay if already playing
+            if (!audio.paused) return;
             this.playAudioInstance(audio);
         }
     }

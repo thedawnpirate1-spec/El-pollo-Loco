@@ -34,7 +34,7 @@ class MovableObject extends DrawableObject{
         if (this.y >= 200 && !(this instanceof ThrowableObject)) {
             this.y = 200;
             this.speedY = 0;
-            setTimeout(() => this.isFalling = false, 100); // 100ms grace period for jump attacks
+            setTimeout(() => this.isFalling = false, 100);
         }
     }
 
@@ -81,9 +81,9 @@ class MovableObject extends DrawableObject{
      * @returns {boolean} True if hurt.
      */
     isHurt(){
-        let timepassed = new Date().getTime() - this.lastHit; // Time in ms
-        timepassed = timepassed / 1000; // Time in s
-        return timepassed < 0.5; // 0.5 second hurt status
+        let timepassed = new Date().getTime() - this.lastHit;
+        timepassed = timepassed / 1000;
+        return timepassed < 0.5;
     }
     /**
      * Checks if the object's energy is zero.

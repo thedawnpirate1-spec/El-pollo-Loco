@@ -38,6 +38,6 @@ class FloatingText {
         ctx.restore();
         
         this.y -= this.speedY;
-        this.alpha -= 0.02; // Fades out slowly
+        this.alpha -= 0.02;
     }
 }
