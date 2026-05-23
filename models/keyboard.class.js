@@ -8,4 +8,5 @@ class KeyBoard {
     DOWN = false;
     SPACE = false;
     D = false;
+    H = false;
 }

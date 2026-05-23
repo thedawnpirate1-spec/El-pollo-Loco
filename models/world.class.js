@@ -55,6 +55,7 @@ class World {
             this.checkThrowObjects();
             this.checkEndboss();
             this.checkGameStatus();
+            this.checkHealInput();
         }, 50);
     }
     
@@ -166,9 +167,10 @@ class World {
         this.level.coins.splice(index, 1);
     }
 
-    checkAutoHeal() {
-        if (this.character.coins >= 100 && this.character.energy < 180 && !this.character.isDead()) {
+    checkHealInput() {
+        if (this.keyboard.H && this.character.coins >= 100 && this.character.energy < 180 && !this.character.isDead()) {
             this.healCharacter();
+            this.keyboard.H = false; // Prevent multi-trigger
         }
     }
 
@@ -211,7 +213,6 @@ class World {
         } else if (!enemy.isDead()) {
             this.character.hit();
             this.statusBar.setPercentage(this.character.energy / 1.8);
-            this.checkAutoHeal();
         }
     }
 
@@ -219,7 +220,6 @@ class World {
         if (!enemy.isDead()) {
             this.character.hit(200);
             this.statusBar.setPercentage(this.character.energy / 1.8);
-            this.checkAutoHeal();
         }
     }
 

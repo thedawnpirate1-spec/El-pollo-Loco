@@ -220,6 +220,7 @@ window.addEventListener('keydown', (event) =>{
     if(event.keyCode == 38) keyboard.UP = true;
     if(event.keyCode == 40) keyboard.DOWN = true;
     if(event.keyCode == 68) keyboard.D = true;
+    if(event.keyCode == 72) keyboard.H = true;
     if(event.keyCode == 80 || event.keyCode == 27) togglePause();
 });
 
@@ -230,6 +231,7 @@ window.addEventListener('keyup', (event) =>{
     if(event.keyCode == 38) keyboard.UP = false;
     if(event.keyCode == 40) keyboard.DOWN = false;
     if(event.keyCode == 68) keyboard.D = false;
+    if(event.keyCode == 72) keyboard.H = false;
 });
 
 window.addEventListener('resize', () => {

@@ -62,6 +62,7 @@
                     <p><b>Pfeiltasten Links/Rechts:</b> Bewegen</p>
                     <p><b>Leertaste:</b> Springen</p>
                     <p><b>D:</b> Flasche werfen</p>
+                    <p><b>H:</b> Heilen (100 Münzen)</p>
                 </div>
                 <p>Springe auf Gegner, um sie zu besiegen!</p>
                 <button onclick="closeControls()">Schließen</button>
@@ -128,6 +129,13 @@
                         ontouchend="if(event.cancelable) event.preventDefault(); mobileKeyRelease('D')"
                         ontouchcancel="if(event.cancelable) event.preventDefault(); mobileKeyRelease('D')">
                         <img src="img/button icons/bottle-glass-throw.svg" alt="Throw">
+                    </div>
+                    <div id="btnHeal" class="mobile-btn" onmousedown="mobileKeyPress('H')"
+                        onmouseup="mobileKeyRelease('H')" onmouseleave="mobileKeyRelease('H')"
+                        ontouchstart="if(event.cancelable) event.preventDefault(); mobileKeyPress('H')"
+                        ontouchend="if(event.cancelable) event.preventDefault(); mobileKeyRelease('H')"
+                        ontouchcancel="if(event.cancelable) event.preventDefault(); mobileKeyRelease('H')">
+                        <span style="font-size: 24px; font-weight: bold;">H</span>
                     </div>
                 </div>
             </div>
