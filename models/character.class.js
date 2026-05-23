@@ -222,17 +222,18 @@ class Character extends MovableObject{
         if (this.isDead()) this.playDeadAnimation();
         else if (this.isHurt()) this.playAnimation(this.IMAGES_HURT);
         else if (this.isAboveGround()) {
-            if (this.jumpAnimationIndex === undefined) this.jumpAnimationIndex = 0;
-            let frame = Math.floor(this.jumpAnimationIndex); 
-            if (frame < this.IMAGES_JUMPING.length) {
-                this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
-                this.jumpAnimationIndex += 2;
+            let jumpFrame;
+            if (this.speedY > 0) {
+                let progress = 1 - (this.speedY / 17.5);
+                jumpFrame = Math.floor(progress * 4);
             } else {
-                this.img = this.imageCache[this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1]];
+                let progress = Math.min(Math.abs(this.speedY) / 17.5, 1);
+                jumpFrame = 4 + Math.floor(progress * 4);
             }
+            jumpFrame = Math.max(0, Math.min(this.IMAGES_JUMPING.length - 1, jumpFrame));
+            this.img = this.imageCache[this.IMAGES_JUMPING[jumpFrame]];
         }
         else {
-            this.jumpAnimationIndex = 0;
             this.handleGroundAnimations();
         }
     }
