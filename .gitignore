@@ -1,3 +1,6 @@
 todo list
 jsdoc.json
 out
+
+# Local Claude Code config (machine-specific)
+.claude/
