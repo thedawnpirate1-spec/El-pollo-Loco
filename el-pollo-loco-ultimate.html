@@ -15,17 +15,84 @@
     touch-action: none;
   }
   #game { display: block; width: 100vw; height: 100vh; background: #000; }
+
+  /* ===================================================================
+     Rotation gate — fullscreen portrait overlay, pure-CSS animation.
+     Shown only on touch devices held in portrait; fades out in landscape.
+     =================================================================== */
+  #rotateOverlay {
+    position: fixed; inset: 0; z-index: 99999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 22px; text-align: center; padding: 24px;
+    color: #fff;
+    background: radial-gradient(circle at 50% 40%, #3a2a00 0%, #000 75%);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .45s ease, visibility 0s linear .45s;
+  }
+  #rotateOverlay.is-visible {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transition: opacity .45s ease, visibility 0s;
+  }
+  #rotateOverlay h2 { font-size: clamp(20px, 6vw, 34px); color: #ff9900; }
+  #rotateOverlay p  { font-size: clamp(13px, 3.6vw, 18px); opacity: .85; max-width: 80vw; }
+  .rotate-stage {
+    position: relative; width: clamp(90px,28vmin,160px); height: clamp(90px,28vmin,160px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rotate-phone {
+    width: clamp(48px,15vmin,84px); height: clamp(86px,27vmin,150px);
+    border: 4px solid #ff9900; border-radius: 14px;
+    background: rgba(255,153,0,.12); box-shadow: 0 0 22px rgba(255,153,0,.45);
+    display: flex; align-items: center; justify-content: center;
+    transform-origin: 50% 50%; animation: rotPhone 2.6s ease-in-out infinite;
+  }
+  .rotate-phone .notch {
+    position: absolute; top: 8px; width: 26%; height: 4px; border-radius: 4px;
+    background: #ff9900; opacity: .8;
+  }
+  .rotate-chicken { font-size: clamp(24px,9vmin,46px); animation: rotChick 2.6s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+  .rotate-arrow {
+    position: absolute; width: clamp(70px,22vmin,130px); height: clamp(70px,22vmin,130px);
+    border: 4px solid transparent; border-top-color: rgba(255,153,0,.85);
+    border-right-color: rgba(255,153,0,.85); border-radius: 50%;
+    animation: rotArrow 2.6s ease-in-out infinite;
+  }
+  @keyframes rotPhone { 0%,18%{transform:rotate(0)} 50%,78%{transform:rotate(-90deg)} 96%,100%{transform:rotate(-90deg)} }
+  @keyframes rotChick { 0%,18%{transform:rotate(0) scale(1)} 50%,78%{transform:rotate(90deg) scale(1.08)} 96%,100%{transform:rotate(90deg) scale(1)} }
+  @keyframes rotArrow { 0%,18%{transform:rotate(0);opacity:.4} 50%{transform:rotate(-90deg);opacity:1} 78%,100%{transform:rotate(-90deg);opacity:.4} }
+  @media (prefers-reduced-motion: reduce) {
+    .rotate-phone,.rotate-chicken,.rotate-arrow { animation-duration: .001s; animation-iteration-count: 1; }
+  }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
+
+<!-- Rotation gate: shown on touch devices in portrait (see MobileGate) -->
+<div id="rotateOverlay" aria-hidden="true" role="dialog" aria-label="Bitte Gerät drehen">
+  <div class="rotate-stage" aria-hidden="true">
+    <div class="rotate-phone"><span class="notch"></span><span class="rotate-chicken">🐔</span></div>
+    <div class="rotate-arrow"></div>
+  </div>
+  <h2>Bitte dreh dein Gerät</h2>
+  <p>El Pollo Loco ULTIMATE spielt sich am besten im Querformat.</p>
+</div>
+
 <script>
 "use strict";
-/* ============================================================================
-   EL POLLO LOCO ULTIMATE  —  single-file HTML5 canvas game
-   Virtual world: 1280x720 (16:9). Scaled to fit with letterboxing.
-   All timings in milliseconds. Everything procedural (graphics + audio).
-   ========================================================================== */
+/**
+ * @file El Pollo Loco ULTIMATE — single-file HTML5 canvas game.
+ * @module ElPolloLocoUltimate
+ * @description
+ * A self-contained side-scrolling platformer rendered on a single canvas.
+ * The world is a virtual 1280x720 (16:9) space scaled to fit any viewport with
+ * letterboxing; all timings are in milliseconds and every graphic and sound is
+ * generated procedurally (no external assets). Input is unified across keyboard
+ * and multi-touch, and a {@link MobileGate} layer adds native-feeling mobile
+ * behaviour (rotation gate, visibility pause). Wrapped in an IIFE to keep the
+ * global scope clean.
+ */
 
 (function () {
 
@@ -46,13 +113,53 @@ const STATE = {
 };
 
 /* ----------------------------- Utilities -------------------------------- */
+/**
+ * Clamps a value into the inclusive range [a, b].
+ * @param {number} v - Value to clamp.
+ * @param {number} a - Lower bound.
+ * @param {number} b - Upper bound.
+ * @returns {number} The clamped value.
+ */
 const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+/**
+ * Linear interpolation between a and b.
+ * @param {number} a - Start value.
+ * @param {number} b - End value.
+ * @param {number} t - Interpolation factor (0..1).
+ * @returns {number} The interpolated value.
+ */
 const lerp = (a, b, t) => a + (b - a) * t;
+/**
+ * Returns a random float in [a, b).
+ * @param {number} a - Inclusive lower bound.
+ * @param {number} b - Exclusive upper bound.
+ * @returns {number} Random float.
+ */
 function rand(a, b) { return a + Math.random() * (b - a); }
+/**
+ * Returns a random integer in [a, b] (inclusive).
+ * @param {number} a - Inclusive lower bound.
+ * @param {number} b - Inclusive upper bound.
+ * @returns {number} Random integer.
+ */
 function randi(a, b) { return Math.floor(rand(a, b + 1)); }
+/**
+ * Euclidean distance between two points.
+ * @param {number} ax - First point X.
+ * @param {number} ay - First point Y.
+ * @param {number} bx - Second point X.
+ * @param {number} by - Second point Y.
+ * @returns {number} The distance.
+ */
 function dist(ax, ay, bx, by) { const dx = ax - bx, dy = ay - by; return Math.sqrt(dx * dx + dy * dy); }
 
-// AABB with 10% shrink to avoid false positives
+/**
+ * Axis-aligned bounding-box overlap test, with a 10% shrink on each box to
+ * avoid visually-unfair false positives.
+ * @param {{x:number,y:number,w:number,h:number}} a - First box.
+ * @param {{x:number,y:number,w:number,h:number}} b - Second box.
+ * @returns {boolean} True if the (shrunk) boxes overlap.
+ */
 function aabb(a, b) {
   const sx = a.w * 0.1, sy = a.h * 0.1;
   const sx2 = b.w * 0.1, sy2 = b.h * 0.1;
@@ -62,25 +169,60 @@ function aabb(a, b) {
          (a.y + a.h - sy) > (b.y + sy2);
 }
 
+/**
+ * Runs a function, swallowing and logging any error so a single failure never
+ * crashes the game loop.
+ * @param {Function} fn - The function to execute.
+ * @param {string} [label] - Optional label included in the warning on error.
+ * @returns {*} The function's return value, or `undefined` if it threw.
+ */
 function safe(fn, label) {
   try { return fn(); }
   catch (e) { console.warn("[caught" + (label ? ":" + label : "") + "]", e); return undefined; }
 }
 
 /* ----------------------------- Storage ---------------------------------- */
+/**
+ * @namespace Store
+ * @description Thin, crash-safe wrapper over `localStorage` namespaced with an
+ * `epl_` prefix and JSON (de)serialization.
+ */
 const Store = {
+  /**
+   * Reads and parses a stored value.
+   * @param {string} key - Key (without the `epl_` prefix).
+   * @param {*} def - Default returned when the key is missing or unreadable.
+   * @returns {*} The parsed value or the default.
+   */
   get(key, def) {
     return safe(() => {
       const v = localStorage.getItem("epl_" + key);
       return v === null ? def : JSON.parse(v);
     }, "store.get") ?? def;
   },
+  /**
+   * Serializes and stores a value.
+   * @param {string} key - Key (without the `epl_` prefix).
+   * @param {*} val - JSON-serializable value to persist.
+   * @returns {void}
+   */
   set(key, val) {
     safe(() => localStorage.setItem("epl_" + key, JSON.stringify(val)), "store.set");
   }
 };
 
 /* ----------------------------- Audio ------------------------------------ */
+/**
+ * @class AudioEngine
+ * @classdesc Fully procedural Web Audio engine: synthesizes all sound effects
+ * and a looping chiptune soundtrack from oscillators, with a master gain and a
+ * separate music bus. Lazily initialized and resumed on the first user gesture
+ * to comply with browser autoplay policies.
+ * @property {?AudioContext} ctx - The underlying audio context (null until init).
+ * @property {?GainNode} master - Master output gain.
+ * @property {?GainNode} musicGain - Music bus gain.
+ * @property {boolean} enabled - Whether audio is available/allowed.
+ */
 class AudioEngine {
   constructor() {
     this.ctx = null;
@@ -93,6 +235,11 @@ class AudioEngine {
     this.musicScale = null;
     this.musicNodes = [];
   }
+  /**
+   * Lazily creates the AudioContext and gain graph (master + music bus).
+   * Safe to call repeatedly; disables audio if the API is unavailable.
+   * @returns {void}
+   */
   init() {
     if (this.ctx) return;
     safe(() => {
@@ -107,9 +254,28 @@ class AudioEngine {
       this.musicGain.connect(this.master);
     }, "audio.init");
   }
+  /**
+   * Resumes a suspended AudioContext (autoplay-policy / tab-visibility unlock).
+   * @returns {void}
+   * @mobile
+   */
   resume() { if (this.ctx && this.ctx.state === "suspended") safe(() => this.ctx.resume(), "audio.resume"); }
+  /**
+   * Current audio clock time in seconds.
+   * @returns {number} The context's `currentTime`, or 0 if uninitialized.
+   */
   now() { return this.ctx ? this.ctx.currentTime : 0; }
 
+  /**
+   * Plays a single oscillator tone with an attack/decay envelope and optional
+   * pitch slide.
+   * @param {number} freq - Start frequency in Hz.
+   * @param {number} dur - Duration in seconds.
+   * @param {OscillatorType} [type="sine"] - Oscillator waveform.
+   * @param {number} [gain=0.2] - Peak gain.
+   * @param {number} [slideTo] - If set, exponentially ramps to this frequency.
+   * @returns {void}
+   */
   tone(freq, dur, type, gain, slideTo) {
     if (!this.enabled || !this.ctx) return;
     safe(() => {
@@ -126,6 +292,12 @@ class AudioEngine {
       o.start(t); o.stop(t + dur + 0.02);
     }, "audio.tone");
   }
+  /**
+   * Plays a band-passed white-noise burst (used for impacts/explosions).
+   * @param {number} dur - Duration in seconds.
+   * @param {number} [gain=0.3] - Peak gain.
+   * @returns {void}
+   */
   noise(dur, gain) {
     if (!this.enabled || !this.ctx) return;
     safe(() => {
@@ -144,22 +316,43 @@ class AudioEngine {
       src.start(t);
     }, "audio.noise");
   }
+  /** Plays the jump sound. @returns {void} */
   jump()  { this.tone(220, 0.12, "square", 0.18, 440); }
+  /**
+   * Plays the coin pickup blip, pitched up by the current combo.
+   * @param {number} [p=0] - Combo/pitch offset.
+   * @returns {void}
+   */
   coin(p) { this.tone(880 + (p || 0) * 60, 0.06, "triangle", 0.18, 1320); }
+  /** Plays the combo increment chime. @returns {void} */
   combo() { this.tone(660, 0.08, "triangle", 0.2, 990); }
+  /** Plays the player-hurt sound. @returns {void} */
   hurt()  { this.noise(0.2, 0.35); this.tone(160, 0.18, "sawtooth", 0.2, 60); }
+  /** Plays the boss projectile-fire sound. @returns {void} */
   bossShoot() { this.tone(80, 0.3, "sawtooth", 0.25, 40); }
+  /** Plays the boss-hit sound. @returns {void} */
   bossHit() { this.noise(0.12, 0.25); this.tone(300, 0.1, "square", 0.2, 120); }
+  /** Plays the combo-break sound. @returns {void} */
   comboBreak() { this.tone(300, 0.2, "sawtooth", 0.2, 90); }
+  /** Plays the explosion sound. @returns {void} */
   explosion() { this.noise(0.35, 0.4); this.tone(120, 0.3, "sawtooth", 0.25, 40); }
+  /** Plays the power-up jingle. @returns {void} */
   powerup() { this.tone(523, 0.08, "triangle", 0.2); setTimeout(() => this.tone(784, 0.12, "triangle", 0.2), 80); }
+  /** Plays the shop-purchase sound. @returns {void} */
   buy() { this.tone(440, 0.06, "square", 0.2, 660); setTimeout(() => this.tone(880, 0.1, "square", 0.2), 60); }
+  /** Plays the descending game-over fanfare. @returns {void} */
   gameOver() {
     [523, 440, 349, 261].forEach((f, i) => setTimeout(() => this.tone(f, 0.3, "sawtooth", 0.22), i * 200));
   }
+  /** Plays the ascending victory fanfare. @returns {void} */
   victory() {
     [392, 523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.tone(f, 0.25, "triangle", 0.25), i * 130));
   }
+  /**
+   * Selects the looping music scale for a level and resets the sequencer.
+   * @param {number} level - Level number (1–3).
+   * @returns {void}
+   */
   setMusic(level) {
     // Level scales
     if (level === 1) this.musicScale = [261, 329, 392, 523, 392, 329];       // C major-ish, fröhlich
@@ -169,6 +362,12 @@ class AudioEngine {
     this.musicStep = 0;
     this.musicTimer = 0;
   }
+  /**
+   * Advances the step sequencer, emitting the next music note (and percussion
+   * in high-BPM boss phases) when the beat interval elapses.
+   * @param {number} dt - Elapsed time since last frame, in milliseconds.
+   * @returns {void}
+   */
   updateMusic(dt) {
     if (!this.enabled || !this.ctx || !this.musicScale) return;
     this.musicTimer -= dt;
@@ -182,16 +381,32 @@ class AudioEngine {
       this.musicStep++;
     }
   }
+  /** Stops the music sequencer. @returns {void} */
   stopMusic() { this.musicScale = null; }
 }
 const Audio = new AudioEngine();
 
 /* ----------------------------- Input ------------------------------------ */
+/**
+ * @namespace Input
+ * @description Unified input state merging keyboard and on-canvas touch
+ * buttons into a small set of high-level intents (left/right/jump/dash) plus
+ * edge-triggered "pressed" flags for one-shot actions. Touch flags (`_tLeft`
+ * etc.) are written by {@link Game#setupTouch}.
+ */
 const Input = {
   keys: {},
   left: false, right: false, jump: false, jumpPressed: false, dash: false, dashPressed: false,
   _prevJump: false, _prevDash: false,
   touchButtons: [], // filled by HUD
+  /**
+   * Installs keyboard listeners and unlocks audio on the first key event.
+   * @param {HTMLCanvasElement} canvas - The game canvas (reserved for future use).
+   * @returns {void}
+   * @listens Window#keydown
+   * @listens Window#keyup
+   * @listens Window#blur
+   */
   init(canvas) {
     window.addEventListener("keydown", (e) => {
       Audio.resume();
@@ -201,6 +416,11 @@ const Input = {
     window.addEventListener("keyup", (e) => { this.keys[e.code] = false; });
     window.addEventListener("blur", () => { this.keys = {}; });
   },
+  /**
+   * Recomputes the merged intent flags for the current frame, deriving the
+   * edge-triggered `jumpPressed` / `dashPressed` from the previous frame.
+   * @returns {void}
+   */
   update() {
     const k = this.keys;
     const kbLeft = k["ArrowLeft"] || k["KeyA"];
@@ -223,14 +443,37 @@ const Input = {
 };
 
 /* ----------------------------- Particles -------------------------------- */
+/**
+ * @class Particle
+ * @classdesc A single pooled particle (gravity, fade, colored square). Reused
+ * via {@link ParticleSystem} to avoid per-frame allocation.
+ */
 class Particle {
   constructor() { this.active = false; }
+  /**
+   * Activates the particle with the given motion and appearance.
+   * @param {number} x - Start X.
+   * @param {number} y - Start Y.
+   * @param {number} vx - Velocity X (px/ms).
+   * @param {number} vy - Velocity Y (px/ms).
+   * @param {number} life - Lifetime in milliseconds.
+   * @param {string} color - Fill color.
+   * @param {number} size - Square size in px.
+   * @param {number} [gravity=0] - Downward acceleration (px/ms²).
+   * @param {boolean} [fade=true] - Whether to fade/shrink over its lifetime.
+   * @returns {void}
+   */
   spawn(x, y, vx, vy, life, color, size, gravity, fade) {
     this.x = x; this.y = y; this.vx = vx; this.vy = vy;
     this.life = life; this.maxLife = life; this.color = color;
     this.size = size; this.gravity = gravity || 0; this.fade = fade !== false;
     this.active = true;
   }
+  /**
+   * Advances the particle, deactivating it when its life expires.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @returns {void}
+   */
   update(dt) {
     if (!this.active) return;
     this.life -= dt;
@@ -239,6 +482,11 @@ class Particle {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
   }
+  /**
+   * Draws the particle (alpha/size eased by remaining life when fading).
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     if (!this.active) return;
     const a = this.fade ? clamp(this.life / this.maxLife, 0, 1) : 1;
@@ -249,12 +497,37 @@ class Particle {
     ctx.globalAlpha = 1;
   }
 }
+/**
+ * @class ParticleSystem
+ * @classdesc Fixed-size object pool of {@link Particle}s with helpers to emit
+ * bursts (sparkles, debris, explosions) and to update/draw the whole pool.
+ * @property {number} max - Pool capacity.
+ */
 class ParticleSystem {
   constructor(max) {
     this.max = max || 200;
     this.pool = [];
     for (let i = 0; i < this.max; i++) this.pool.push(new Particle());
   }
+  /**
+   * Emits a burst of particles from the pool.
+   * @param {Object} opts - Emission options.
+   * @param {number} opts.x - Origin X.
+   * @param {number} opts.y - Origin Y.
+   * @param {number} opts.count - Number of particles to spawn.
+   * @param {number} opts.speedMin - Minimum speed (px/ms).
+   * @param {number} opts.speedMax - Maximum speed (px/ms).
+   * @param {number} opts.lifeMin - Minimum lifetime (ms).
+   * @param {number} opts.lifeMax - Maximum lifetime (ms).
+   * @param {string|function():string} opts.color - Color or color factory.
+   * @param {number} opts.sizeMin - Minimum size (px).
+   * @param {number} opts.sizeMax - Maximum size (px).
+   * @param {number} [opts.angle] - Base emission angle; omit for full circle.
+   * @param {number} [opts.spread] - Angular spread around `angle`.
+   * @param {number} [opts.gravity] - Gravity applied to each particle.
+   * @param {boolean} [opts.fade] - Whether particles fade out.
+   * @returns {void}
+   */
   emit(opts) {
     let spawned = 0;
     for (let i = 0; i < this.max && spawned < opts.count; i++) {
@@ -273,22 +546,68 @@ class ParticleSystem {
       }
     }
   }
+  /**
+   * Updates every particle in the pool.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @returns {void}
+   */
   update(dt) { for (const p of this.pool) p.update(dt); }
+  /**
+   * Draws every active particle.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) { for (const p of this.pool) p.draw(ctx); }
+  /**
+   * Deactivates all particles (e.g. on level reset).
+   * @returns {void}
+   */
   clear() { for (const p of this.pool) p.active = false; }
 }
 
 /* ----------------------------- Camera shake ----------------------------- */
+/**
+ * @namespace Shake
+ * @description Global screen-shake accumulator. Effects request a duration and
+ * magnitude; the renderer reads `Shake.x`/`Shake.y` each frame for a random
+ * offset that decays to zero.
+ */
 const Shake = {
   t: 0, mag: 0,
+  /**
+   * Requests a shake, taking the strongest of any overlapping requests.
+   * @param {number} ms - Duration in milliseconds.
+   * @param {number} mag - Magnitude in pixels.
+   * @returns {void}
+   */
   add(ms, mag) { this.t = Math.max(this.t, ms); this.mag = Math.max(this.mag, mag); },
+  /**
+   * Decays the remaining shake time.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @returns {void}
+   */
   update(dt) { if (this.t > 0) { this.t -= dt; if (this.t <= 0) this.mag = 0; } },
+  /** @returns {number} Random horizontal shake offset for this frame. */
   get x() { return this.t > 0 ? rand(-this.mag, this.mag) : 0; },
+  /** @returns {number} Random vertical shake offset for this frame. */
   get y() { return this.t > 0 ? rand(-this.mag, this.mag) : 0; }
 };
 
 /* ----------------------------- Platform --------------------------------- */
+/**
+ * @class Platform
+ * @classdesc A solid (optionally moving/crumbling) surface the player and
+ * enemies stand on, expressed in virtual-world coordinates.
+ */
 class Platform {
+  /**
+   * @param {number} x - Left X in virtual coords.
+   * @param {number} y - Top Y in virtual coords.
+   * @param {number} w - Width in px.
+   * @param {number} h - Height in px.
+   * @param {{moving?:boolean,falling?:boolean,color?:string,color2?:string}} [opts] - Options.
+   * @constructor
+   */
   constructor(x, y, w, h, opts) {
     opts = opts || {};
     this.x = x; this.y = y; this.w = w; this.h = h;
@@ -301,9 +620,20 @@ class Platform {
     this.edge = opts.color2 || "#6b4420";
     this.standing = false;
   }
+  /** @returns {boolean} False once a crumbled platform has fallen off-screen. */
   get alive() { return !this.fallen || this.fy < WORLD_H + 200; }
+  /** @returns {boolean} Whether the platform is still in play. */
   isAlive() { return this.alive; }
+  /**
+   * Starts the crumble countdown when a player lands on a falling platform.
+   * @returns {void}
+   */
   triggerFall() { if (this.falling && this.fallTimer < 0) this.fallTimer = 2000; }
+  /**
+   * Advances drift (moving platforms) and the crumble/fall sequence.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @returns {void}
+   */
   update(dt) {
     if (this.moving) {
       this.phase += dt * 0.0016;
@@ -320,6 +650,11 @@ class Platform {
       this.y = this.baseY + this.fy;
     }
   }
+  /**
+   * Draws the platform with edge highlights and a pre-fall shake.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     const shaky = this.fallTimer > 0 && this.fallTimer < 2000;
     const ox = shaky ? rand(-1.5, 1.5) : 0;
@@ -342,6 +677,10 @@ const COIN_TYPES = {
   mega:     { value: 25, r: 16, color: "#ff4fd8", shine: "#ffd0f5", rare: 0.06, magnet: 150 },
   rainbow:  { value: 50, r: 15, color: "#ff0000", shine: "#ffffff", rare: 0 }
 };
+/**
+ * Randomly selects a coin type weighted by each type's `rare` probability.
+ * @returns {string} One of "bronze" | "silver" | "gold" | "mega".
+ */
 function pickCoinType() {
   const r = Math.random();
   let acc = 0;
@@ -351,7 +690,18 @@ function pickCoinType() {
   }
   return "bronze";
 }
+/**
+ * @class Coin
+ * @classdesc A collectible coin (normal or special) with idle bob animation
+ * and optional magnet attraction toward the player.
+ */
 class Coin {
+  /**
+   * @param {number} x - Center X.
+   * @param {number} y - Center Y.
+   * @param {string} [type] - Coin type; random (weighted) when omitted.
+   * @constructor
+   */
   constructor(x, y, type) {
     this.type = type || pickCoinType();
     const t = COIN_TYPES[this.type];
@@ -369,12 +719,21 @@ class Coin {
     this.tween = 0;
     this.bobPhase = rand(0, Math.PI * 2);
   }
+  /** @returns {boolean} True while the coin has not been collected/removed. */
   isAlive() { return !this.dead; }
+  /** @returns {number} Center X. */
   get cx() { return this.x; }
+  /** @returns {number} Center Y. */
   get cy() { return this.y; }
-  // bounding box for AABB uses center
+  /** @returns {number} AABB left edge (center minus radius). */
   get bx() { return this.x - this.r; }
+  /** @returns {number} AABB top edge (center minus radius). */
   get by() { return this.y - this.r; }
+  /**
+   * Applies gravity and settles the coin onto a platform until it lands.
+   * @param {Platform[]} platforms - Platforms to rest on.
+   * @returns {void}
+   */
   collide(platforms) {
     if (this.landed) return;
     const t = COIN_TYPES[this.type];
@@ -390,6 +749,12 @@ class Coin {
     }
     if (this.y > WORLD_H + 100) { this.dead = true; }
   }
+  /**
+   * Advances spin, bob, spawn-scale, respawn timer and magnet attraction.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game (for magnet/player position).
+   * @returns {void}
+   */
   update(dt, game) {
     this.spin += dt * 0.004;
     this.hue = (this.hue + dt * 0.4) % 360;
@@ -414,6 +779,12 @@ class Coin {
     // gravity/bounce
     this.collide(game.platforms);
   }
+  /**
+   * Draws the coin with spin squash, type color, highlight, value pip and a
+   * mega/rainbow glow.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     if (this.collected && !this.flying) return;
     const t = COIN_TYPES[this.type];
@@ -451,10 +822,28 @@ class Coin {
     }
   }
 }
-let dt0 = 16; // shared dt for coin.collide convenience (set each frame)
+/**
+ * Shared per-frame delta time (ms) used by {@link Coin#collide}; updated by the
+ * game each frame.
+ * @type {number}
+ */
+let dt0 = 16;
 
 /* ----------------------------- Projectiles ------------------------------ */
+/**
+ * @class Projectile
+ * @classdesc A thrown salsa bottle (or boss projectile) following a ballistic
+ * arc until it hits an enemy, the ground, or expires.
+ */
 class Projectile {
+  /**
+   * @param {number} x - Start X.
+   * @param {number} y - Start Y.
+   * @param {number} vx - Velocity X (px/ms).
+   * @param {number} vy - Velocity Y (px/ms).
+   * @param {{r?:number,gravity?:number,life?:number,fromBoss?:boolean,damage?:number,color?:string,feather?:boolean}} [opts] - Options.
+   * @constructor
+   */
   constructor(x, y, vx, vy, opts) {
     opts = opts || {};
     this.x = x; this.y = y; this.vx = vx; this.vy = vy;
@@ -467,9 +856,19 @@ class Projectile {
     this.color = opts.color || "#ff7b00";
     this.feather = !!opts.feather;
   }
+  /** @returns {boolean} True while the projectile is in flight. */
   isAlive() { return !this.dead; }
+  /** @returns {number} AABB left edge. */
   get bx() { return this.x - this.r; }
+  /** @returns {number} AABB top edge. */
   get by() { return this.y - this.r; }
+  /**
+   * Integrates the ballistic motion and kills the projectile on expiry or when
+   * it leaves the world bounds.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game (unused; kept for a uniform signature).
+   * @returns {void}
+   */
   update(dt, game) {
     this.life -= dt;
     if (this.life <= 0) { this.dead = true; return; }
@@ -481,6 +880,11 @@ class Projectile {
       this.dead = true;
     }
   }
+  /**
+   * Draws the projectile as a glowing orb, or a spinning feather variant.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     ctx.save();
     if (this.feather) {
@@ -504,10 +908,26 @@ class Projectile {
 
 /* ----------------------------- Hazards ---------------------------------- */
 // Lava bubble (L2), Shockwave ring (boss), Fire patch (boss), Meteor (boss), DangerZone overlay
+/**
+ * @class Shockwave
+ * @classdesc An expanding ring hazard (boss slam) that damages the player once
+ * as its radius sweeps past them.
+ */
 class Shockwave {
   constructor(x, y) { this.x = x; this.y = y; this.r = 10; this.maxR = 380; this.dead = false; this.hitDone = false; }
+  /** @returns {boolean} True until the ring reaches its max radius. */
   isAlive() { return !this.dead; }
+  /**
+   * Expands the ring, killing it once it exceeds its maximum radius.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @returns {void}
+   */
   update(dt) { this.r += dt * 0.7; if (this.r > this.maxR) this.dead = true; }
+  /**
+   * Draws the expanding double-stroke shockwave ring (fading with radius).
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     ctx.save();
     ctx.globalAlpha = clamp(1 - this.r / this.maxR, 0, 1);
@@ -518,9 +938,21 @@ class Shockwave {
     ctx.restore();
   }
 }
+/**
+ * @class FirePatch
+ * @classdesc A temporary patch of ground fire that damages the player on
+ * contact and fades after a fixed lifetime.
+ */
 class FirePatch {
   constructor(x, y, w) { this.x = x; this.y = y; this.w = w; this.h = 14; this.life = 5000; this.dead = false; }
+  /** @returns {boolean} True until the fire patch burns out. */
   isAlive() { return !this.dead; }
+  /**
+   * Burns down the patch's lifetime and emits rising flame particles.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game (particle system).
+   * @returns {void}
+   */
   update(dt, game) {
     this.life -= dt; if (this.life <= 0) this.dead = true;
     if (Math.random() < 0.5) game.particles.emit({
@@ -529,21 +961,40 @@ class FirePatch {
       color: () => ["#ff3300", "#ff8800", "#ffcc00"][randi(0, 2)], sizeMin: 3, sizeMax: 7, gravity: -0.0002
     });
   }
+  /**
+   * Draws the fire patch, fading as it burns out.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     ctx.save(); ctx.globalAlpha = clamp(this.life / 5000, 0.2, 1);
     ctx.fillStyle = "#cc2200"; ctx.fillRect(this.x, this.y, this.w, this.h);
     ctx.restore();
   }
 }
+/**
+ * @class LavaBubble
+ * @classdesc A blob of lava that erupts upward from the ground and damages the
+ * player if struck mid-arc.
+ */
 class LavaBubble {
   constructor(x, groundY) {
     this.x = x; this.groundY = groundY; this.y = groundY;
     this.warn = 1000; this.active = false; this.vy = -0.7;
     this.r = 18; this.w = 36; this.h = 36; this.dead = false; this.life = 1600;
   }
+  /** @returns {boolean} True while the bubble is airborne. */
   isAlive() { return !this.dead; }
+  /** @returns {number} AABB left edge. */
   get bx() { return this.x - this.r; }
+  /** @returns {number} AABB top edge. */
   get by() { return this.y - this.r; }
+  /**
+   * Runs the warn telegraph, then the upward eruption arc; dies on landing or
+   * lifetime expiry.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @returns {void}
+   */
   update(dt) {
     if (this.warn > 0) { this.warn -= dt; if (this.warn <= 0) this.active = true; return; }
     this.vy += GRAVITY * dt;
@@ -551,6 +1002,11 @@ class LavaBubble {
     this.life -= dt;
     if (this.y > this.groundY + 20 || this.life <= 0) this.dead = true;
   }
+  /**
+   * Draws the ground warning arc during the telegraph, then the glowing blob.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     if (this.warn > 0) {
       ctx.save();
@@ -566,15 +1022,30 @@ class LavaBubble {
     ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
   }
 }
+/**
+ * @class Meteor
+ * @classdesc A falling meteor hazard that telegraphs a target spot, then drops
+ * and bursts into particles on impact.
+ */
 class Meteor {
   constructor(tx, groundY) {
     this.tx = tx; this.groundY = groundY;
     this.warn = 700; this.x = tx; this.y = -50; this.vy = 0; this.dead = false;
     this.r = 22; this.w = 44; this.h = 44; this.falling = false; this.exploded = false;
   }
+  /** @returns {boolean} True until the meteor explodes. */
   isAlive() { return !this.dead; }
+  /** @returns {number} AABB left edge. */
   get bx() { return this.x - this.r; }
+  /** @returns {number} AABB top edge. */
   get by() { return this.y - this.r; }
+  /**
+   * Telegraphs the target, then falls and explodes (particles + shake + sound)
+   * on impact.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game (particles).
+   * @returns {void}
+   */
   update(dt, game) {
     if (this.warn > 0) { this.warn -= dt; if (this.warn <= 0) this.falling = true; return; }
     this.vy += GRAVITY * 1.6 * dt;
@@ -588,6 +1059,12 @@ class Meteor {
       safe(() => Audio.explosion(), "meteor.boom");
     }
   }
+  /**
+   * Draws the ground target reticle during the telegraph, then the falling
+   * fireball with a trail.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     if (this.warn > 0) {
       ctx.save();
@@ -612,7 +1089,18 @@ class Meteor {
 }
 
 /* ----------------------------- Enemies ---------------------------------- */
+/**
+ * @class Chicken
+ * @classdesc A basic walking enemy. Patrols, can be defeated by a stomp from
+ * above or a thrown projectile, and damages the player on side contact.
+ */
 class Chicken {
+  /**
+   * @param {number} x - Spawn X.
+   * @param {number} y - Spawn Y.
+   * @param {{speed?:number,hp?:number,fire?:boolean,mini?:boolean,platform?:Platform}} [opts] - Options.
+   * @constructor
+   */
   constructor(x, y, opts) {
     opts = opts || {};
     this.x = x; this.y = y; this.w = 46; this.h = 42;
@@ -624,8 +1112,18 @@ class Chicken {
     this.legPhase = 0; this.flash = 0;
     this.vy = 0; this.platform = opts.platform || null;
   }
+  /** @returns {boolean} True while the chicken is alive. */
   isAlive() { return !this.dead; }
-  get bx() { return this.x; } get by() { return this.y; }
+  /** @returns {number} AABB left edge. */
+  get bx() { return this.x; }
+  /** @returns {number} AABB top edge. */
+  get by() { return this.y; }
+  /**
+   * Applies damage; on death emits debris and drops a coin.
+   * @param {number} dmg - Damage dealt.
+   * @param {Game} game - The owning game (particles, coin drop).
+   * @returns {void}
+   */
   hurt(dmg, game) {
     this.hp -= dmg; this.flash = 120;
     safe(() => Audio.bossHit(), "chick.hit");
@@ -641,6 +1139,13 @@ class Chicken {
       game.coins.push(new Coin(this.x + this.w / 2, this.y, this.mini ? "gold" : "bronze"));
     }
   }
+  /**
+   * Advances patrol movement (platform-bounded or ground-bounded), gravity and
+   * fire-chicken shooting.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game (ground, player, projectiles).
+   * @returns {void}
+   */
   update(dt, game) {
     if (this.flash > 0) this.flash -= dt;
     this.legPhase += dt * 0.01 * Math.abs(this.vx) * 60;
@@ -672,6 +1177,12 @@ class Chicken {
       }
     }
   }
+  /**
+   * Draws the chicken (legs, body, head, beak, comb) with a hit flash and
+   * fire/mini color variants, facing its travel direction.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
@@ -704,6 +1215,13 @@ class Chicken {
 
 /* ----------------------------- Boss ------------------------------------- */
 const BOSS_STATE = { IDLE: "IDLE", MOVING: "MOVING", ATTACKING: "ATTACKING", STUNNED: "STUNNED", TRANSITIONING: "TRANSITIONING" };
+/**
+ * @class Boss
+ * @classdesc "El Diablo Pollo" — the multi-phase end boss with melee, slam
+ * (shockwave), projectile and meteor attacks, telegraphed weak-point windows,
+ * and a health bar.
+ * @property {Game} game - Back-reference to the owning game.
+ */
 class Boss {
   constructor(game) {
     this.game = game;
@@ -733,15 +1251,30 @@ class Boss {
     this.playerHist = {}; this.histTimer = 0;
     this.speed = 0.05;
   }
+  /** @returns {boolean} True while the boss is alive. */
   isAlive() { return !this.dead; }
-  get bx() { return this.x; } get by() { return this.y; }
+  /** @returns {number} AABB left edge. */
+  get bx() { return this.x; }
+  /** @returns {number} AABB top edge. */
+  get by() { return this.y; }
 
+  /**
+   * Rescales the boss about its bottom-center anchor (used on phase growth).
+   * @param {number} s - New scale factor relative to the base size.
+   * @returns {void}
+   */
   applyScale(s) {
     const cx = this.x + this.w / 2, by = this.y + this.h;
     this.scale = s;
     this.w = this.baseW * s; this.h = this.baseH * s;
     this.x = cx - this.w / 2; this.y = by - this.h;
   }
+  /**
+   * Applies damage: stuns, builds rage, emits debris, checks for a phase
+   * transition and triggers death at zero HP. Ignored mid-transition.
+   * @param {number} dmg - Damage dealt.
+   * @returns {void}
+   */
   hurt(dmg) {
     if (this.state === BOSS_STATE.TRANSITIONING) return;
     this.hp -= dmg; this.flash = 140; this.stun = Math.max(this.stun, 300);
@@ -754,6 +1287,10 @@ class Boss {
     this.checkPhase();
     if (this.hp <= 0) { this.hp = 0; this.die(); }
   }
+  /**
+   * Kills the boss with a large explosion burst and screen shake.
+   * @returns {void}
+   */
   die() {
     this.dead = true;
     for (let i = 0; i < 60; i++) {
@@ -764,10 +1301,20 @@ class Boss {
     }
     Shake.add(800, 10);
   }
+  /**
+   * Triggers a phase transition when HP crosses the phase thresholds.
+   * @returns {void}
+   */
   checkPhase() {
     if (this.phase === 1 && this.hp <= 180) this.enterPhase(2);
     else if (this.phase === 2 && this.hp <= 90) this.enterPhase(3);
   }
+  /**
+   * Enters a new boss phase: shows the taunt, speeds up, (phase 3) grows and
+   * raises the music tempo.
+   * @param {number} p - The phase to enter (2 or 3).
+   * @returns {void}
+   */
   enterPhase(p) {
     this.phase = p;
     this.state = BOSS_STATE.TRANSITIONING;
@@ -786,19 +1333,33 @@ class Boss {
       this.game.freeze = 800;
     }
   }
+  /**
+   * Enters a timed rage state (faster, relentless) once the rage meter fills.
+   * @returns {void}
+   */
   triggerRage() {
     if (this.raging || this.exhausted > 0) return;
     this.raging = true; this.rageDuration = 3000; this.rage = 0;
     this.state = BOSS_STATE.ATTACKING;
     Shake.add(400, 5);
   }
-  // attack pool depends on phase
+  /**
+   * Picks a random attack from the pool available in the current phase.
+   * @returns {number} The chosen attack id.
+   */
   chooseAttack() {
     const pool = [1, 2, 3];
     if (this.phase >= 2) pool.push(4, 5, 6);
     if (this.phase >= 3) pool.push(7, 8);
     return pool[randi(0, pool.length - 1)];
   }
+  /**
+   * Executes the given attack pattern (stomp/shockwave, fireball spreads,
+   * meteors, dashes, fire patches, …) by spawning the relevant hazards and
+   * projectiles.
+   * @param {number} n - The attack id from {@link Boss#chooseAttack}.
+   * @returns {void}
+   */
   doAttack(n) {
     const g = this.game;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
@@ -843,6 +1404,13 @@ class Boss {
       for (let i = 0; i < 8; i++) g.hazards.push(new Meteor(rand(60, WORLD_W - 60), g.groundY));
     }
   }
+  /**
+   * Drives the boss state machine each frame: transitions, teleports, attack
+   * selection/telegraph/execution, rage, movement, gravity and stun recovery.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game.
+   * @returns {void}
+   */
   update(dt, game) {
     if (this.dead) return;
     this.flapPhase += dt * 0.01;
@@ -961,6 +1529,12 @@ class Boss {
       this.state = BOSS_STATE.ATTACKING;
     }
   }
+  /**
+   * Applies gravity to the boss and, on landing a stomp, spawns a shockwave.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game (ground, hazards).
+   * @returns {void}
+   */
   applyGravity(dt, game) {
     this.vy += GRAVITY * dt;
     this.y += this.vy * dt;
@@ -975,6 +1549,12 @@ class Boss {
       this.y = gy; this.vy = 0;
     }
   }
+  /**
+   * Renders the boss (body, wings, eyes, phase color, rage/exhaust tells and
+   * teleport blink) plus its floating taunt during transitions.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     if (this.dead) return;
     ctx.save();
@@ -1056,6 +1636,13 @@ class Boss {
 
 /* ----------------------------- Player ----------------------------------- */
 const PSTATE = { IDLE: "IDLE", RUN: "RUN", JUMP: "JUMP", FALL: "FALL", DASH: "DASH", HURT: "HURT", DEAD: "DEAD" };
+/**
+ * @class Player
+ * @classdesc The controllable hero (Pepe). Handles tuned variable-height
+ * jumping, double-jump/air-dash upgrades, stomping, throwing, hearts/shield,
+ * invulnerability frames and animation.
+ * @property {Game} game - Back-reference to the owning game.
+ */
 class Player {
   constructor(game) {
     this.game = game;
@@ -1077,14 +1664,29 @@ class Player {
     this.shield = false;
     this.hurtFlash = 0;
   }
+  /** @returns {boolean} True while the player is alive. */
   isAlive() { return !this.dead; }
-  get bx() { return this.x; } get by() { return this.y; }
+  /** @returns {number} Collision-box left edge (alias of x). */
+  get bx() { return this.x; }
+  /** @returns {number} Collision-box top edge (alias of y). */
+  get by() { return this.y; }
 
+  /**
+   * Resets position and transient movement/combat state (used on (re)spawn).
+   * @param {number} x - Spawn X in virtual coords.
+   * @param {number} y - Spawn Y in virtual coords.
+   * @returns {void}
+   */
   reset(x, y) {
     this.x = x; this.y = y; this.prevY = y; this.vx = 0; this.vy = 0;
     this.state = PSTATE.IDLE; this.invuln = 0; this.dead = false;
     this.coyote = 0; this.jumpBuffer = 0; this.onGround = false;
   }
+  /**
+   * Applies purchased upgrades (double jump, air dash, magnet, speed, shield).
+   * @param {{doubleJump:boolean,airDash:boolean,magnet:boolean,speed:boolean,shield:boolean}} u - Upgrade flags.
+   * @returns {void}
+   */
   applyUpgrades(u) {
     this.maxJumps = u.doubleJump ? 2 : 1;
     this.maxAirDash = u.airDash ? 2 : 0;
@@ -1092,6 +1694,13 @@ class Player {
     this.speed = u.speed ? this.baseSpeed * 1.3 : this.baseSpeed;
     this.shield = !!u.shield;
   }
+  /**
+   * Applies damage to the player: consumes a shield if present, otherwise
+   * deducts hearts, grants invulnerability frames, applies knockback, breaks
+   * the combo, and triggers death at zero hearts.
+   * @param {number} [dmg=1] - Damage in hearts.
+   * @returns {void}
+   */
   takeHit(dmg) {
     if (this.invuln > 0 || this.dead) return;
     if (this.shield) {
@@ -1113,12 +1722,24 @@ class Player {
     this.game.combo.reset(true);
     if (this.hearts <= 0) { this.hearts = 0; this.die(); }
   }
+  /**
+   * Kills the player once (idempotent), launching the corpse upward. The guard
+   * prevents repeated knockback from re-firing each frame.
+   * @returns {void}
+   */
   die() {
     if (this.dead) return;        // never re-run death (prevents repeated knockback)
     this.dead = true; this.state = PSTATE.DEAD;
     this.onGround = false;
     this.vy = -0.8;
   }
+  /**
+   * Advances the player one frame: timers, horizontal movement, variable-height
+   * jump, dash, gravity, platform/ground collision, coyote time and animation.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @param {Game} game - The owning game (for platforms, ground, particles).
+   * @returns {void}
+   */
   update(dt, game) {
     if (this.hurtFlash > 0) this.hurtFlash -= dt;
     if (this.invuln > 0) this.invuln -= dt;
@@ -1242,6 +1863,12 @@ class Player {
     // fall death
     if (this.y > WORLD_H + 100) { this.hearts = 0; this.die(); }
   }
+  /**
+   * Renders the player sprite for the current state (idle/run/jump/dash/hurt/
+   * dead), including invulnerability blink, shield aura and facing flip.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   draw(ctx) {
     ctx.save();
     // invuln blink
@@ -1292,6 +1919,11 @@ class Player {
 }
 
 /* ----------------------------- Combo ------------------------------------ */
+/**
+ * @class Combo
+ * @classdesc Tracks the player's kill/collect streak within a rolling time
+ * window to award escalating score multipliers and flash feedback.
+ */
 class Combo {
   constructor(game) { this.game = game; this.streak = 0; this.timer = 0; this.window = 2000; this.flash = 0; }
   get multiplier() {
@@ -1300,6 +1932,11 @@ class Combo {
     if (this.streak >= 5) return 1.5;
     return 1;
   }
+  /**
+   * Increments the streak, refreshes the decay timer, and spawns a rainbow coin
+   * at the x3 milestone.
+   * @returns {void}
+   */
   add() {
     const prevMult = this.multiplier;
     this.streak++;
@@ -1310,6 +1947,12 @@ class Combo {
       this.game.spawnRainbow();
     }
   }
+  /**
+   * Resets the streak, playing a break sound/flash if a meaningful streak was
+   * lost.
+   * @param {boolean} [broken] - True when the streak was broken (timeout/hit).
+   * @returns {void}
+   */
   reset(broken) {
     if (broken && this.streak >= 5) {
       this.flash = 200;
@@ -1317,6 +1960,11 @@ class Combo {
     }
     this.streak = 0; this.timer = 0;
   }
+  /**
+   * Ticks the flash and decay timers, breaking the combo when it lapses.
+   * @param {number} dt - Elapsed time in milliseconds.
+   * @returns {void}
+   */
   update(dt) {
     if (this.flash > 0) this.flash -= dt;
     if (this.timer > 0) {
@@ -1336,6 +1984,18 @@ const UPGRADES = [
 ];
 
 /* ----------------------------- Game ------------------------------------- */
+/**
+ * @class Game
+ * @classdesc Central controller: owns the state machine (MENU/PLAYING/PAUSED/
+ * SHOP/GAMEOVER/VICTORY), the entity lists, responsive letterbox scaling,
+ * input-to-action wiring, the on-canvas touch buttons, the HUD/screens, level
+ * generation, collision/update/draw orchestration and persistence.
+ * @property {HTMLCanvasElement} canvas - The render target.
+ * @property {CanvasRenderingContext2D} ctx - The 2D drawing context.
+ * @property {string} state - Current {@link STATE} value.
+ * @property {number} scale - Virtual-to-CSS letterbox scale factor.
+ * @property {boolean} showTouch - Whether on-canvas touch controls are shown.
+ */
 class Game {
   constructor(canvas) {
     this.canvas = canvas;
@@ -1363,6 +2023,10 @@ class Game {
     this.setupTouch();
   }
 
+  /**
+   * Clears all entity lists and hazards for a fresh level build.
+   * @returns {void}
+   */
   resetWorld() {
     this.platforms = [];
     this.coins = [];
@@ -1377,6 +2041,13 @@ class Game {
   }
 
   /* ---- responsive scaling ---- */
+  /**
+   * Resizes the canvas to the viewport (accounting for device pixel ratio) and
+   * recomputes the letterbox transform that fits the 16:9 virtual world into
+   * any screen — the object-fit: contain logic for the canvas.
+   * @returns {void}
+   * @mobile
+   */
   resize() {
     safe(() => {
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
@@ -1393,12 +2064,26 @@ class Game {
       this.dpr = dpr;
     }, "resize");
   }
-  // convert client (CSS px) to virtual world coords
+  /**
+   * Converts client (CSS pixel) coordinates into virtual-world coordinates,
+   * undoing the letterbox offset and scale. Used to hit-test taps against
+   * world-space UI and touch buttons.
+   * @param {number} cx - Client X in CSS pixels.
+   * @param {number} cy - Client Y in CSS pixels.
+   * @returns {{x:number, y:number}} The point in virtual-world space.
+   * @mobile
+   */
   toWorld(cx, cy) {
     return { x: (cx - this.offX) / this.scale, y: (cy - this.offY) / this.scale };
   }
 
   /* ---- level setup ---- */
+  /**
+   * Starts a level: resets the world, (re)spawns and re-upgrades the player,
+   * resets the combo, configures music and builds the level geometry.
+   * @param {number} n - Level number (1–3).
+   * @returns {void}
+   */
   startLevel(n) {
     this.level = n;
     this.resetWorld();
@@ -1421,6 +2106,12 @@ class Game {
     this.startTime = performance.now();
   }
 
+  /**
+   * Scatters loose coins at random positions to fall onto the terrain.
+   * @param {number} count - Number of coins to scatter.
+   * @param {string[]} [types] - Optional set of coin types to pick from.
+   * @returns {void}
+   */
   scatterCoins(count, types) {
     for (let i = 0; i < count; i++) {
       const x = rand(80, WORLD_W - 80);
@@ -1429,6 +2120,11 @@ class Game {
       this.coins.push(c);
     }
   }
+  /**
+   * Builds level 1: an ascending/descending platform arch with ground and
+   * platform chickens. Reachable, beginner-friendly layout.
+   * @returns {void}
+   */
   buildLevel1() {
     this.noFloor = false;
     const g = this.groundY;
@@ -1456,6 +2152,11 @@ class Game {
     this.enemies.push(new Chicken(top.x + 20, top.y - 42, { speed: 0.05, platform: top }));
     this.goalX = WORLD_W - 70;
   }
+  /**
+   * Builds level 2: instakill lava pools crossed via solid stone platforms,
+   * optional crumbling coin platforms, fire chickens and periodic lava bubbles.
+   * @returns {void}
+   */
   buildLevel2() {
     this.noFloor = false;
     const g = this.groundY;
@@ -1486,6 +2187,11 @@ class Game {
     this.lavaBubbleTimer = 2500;
     this.goalX = WORLD_W - 70;
   }
+  /**
+   * Builds level 3: symmetric jump islands and the {@link Boss} fight. Won by
+   * defeating the boss rather than reaching a goal.
+   * @returns {void}
+   */
   buildLevel3() {
     this.noFloor = false;
     const g = this.groundY;
@@ -1498,6 +2204,10 @@ class Game {
     this.goalX = -1; // win by killing boss
   }
 
+  /**
+   * Spawns a high-value rainbow coin near the player (combo milestone reward).
+   * @returns {void}
+   */
   spawnRainbow() {
     const x = clamp(this.player.x + rand(-100, 100), 60, WORLD_W - 60);
     this.coins.push(new Coin(x, this.player.y - 60, "rainbow"));
@@ -1505,6 +2215,13 @@ class Game {
   }
 
   /* ---- coin collection ---- */
+  /**
+   * Collects a coin: advances the combo, awards combo-scaled currency/score,
+   * updates persisted totals/high score, plays SFX/particles and may grant a
+   * temporary magnet from mega coins.
+   * @param {Coin} c - The collected coin.
+   * @returns {void}
+   */
   collectCoin(c) {
     const t = COIN_TYPES[c.type];
     this.combo.add();
@@ -1526,6 +2243,14 @@ class Game {
   }
 
   /* ---- main update ---- */
+  /**
+   * Main per-frame simulation step (only fully runs in the PLAYING state):
+   * updates input, player, enemies, boss, projectiles, hazards, coins,
+   * particles and camera; resolves all collisions (including the lava-pool
+   * instakill and level hazards); and checks win/lose conditions.
+   * @param {number} dt - Elapsed time in milliseconds (capped by the loop).
+   * @returns {void}
+   */
   update(dt) {
     Input.update();
     Shake.update(dt);
@@ -1645,8 +2370,12 @@ class Game {
     }
 
     // lava pools (instakill) — guard against re-killing an already-dead player
-    // (otherwise die() re-fires every frame and launches the corpse off-screen)
-    if (this.lavaPools.length && pl.onGround && pl.invuln <= 0 && !pl.dead) {
+    // (otherwise die() re-fires every frame and launches the corpse off-screen).
+    // Only the actual lava FLOOR kills: a player standing on a stone platform
+    // ABOVE a pool is also `onGround`, so require the feet to be at ground level
+    // (otherwise the over-pool crossing platforms become unenterable death traps).
+    const atGroundLevel = pl.y + pl.h >= this.groundY - 2;
+    if (this.lavaPools.length && pl.onGround && atGroundLevel && pl.invuln <= 0 && !pl.dead) {
       for (const lp of this.lavaPools) {
         if (pl.x + pl.w / 2 > lp.x && pl.x + pl.w / 2 < lp.x + lp.w) {
           pl.hearts = 0; pl.die();
@@ -1721,6 +2450,11 @@ class Game {
     }
   }
 
+  /**
+   * Completes the current level with confetti; advances to the shop, or wins
+   * the game after the final level.
+   * @returns {void}
+   */
   completeLevel() {
     // confetti
     for (let i = 0; i < 60; i++) this.particles.emit({ x: rand(0, WORLD_W), y: rand(-50, 100), count: 1,
@@ -1730,9 +2464,17 @@ class Game {
     this.state = STATE.SHOP;
     this._deathTimer = 0;
   }
+  /**
+   * Leaves the shop and starts the next level.
+   * @returns {void}
+   */
   nextLevelFromShop() {
     this.startLevel(this.level + 1);
   }
+  /**
+   * Enters the victory state with a fanfare and celebratory particles.
+   * @returns {void}
+   */
   win() {
     if (this.state === STATE.VICTORY) return;
     this.state = STATE.VICTORY;
@@ -1741,6 +2483,10 @@ class Game {
       speedMin: 0.05, speedMax: 0.25, lifeMin: 1000, lifeMax: 2200,
       color: () => "hsl(" + randi(0, 360) + ",85%,55%)", sizeMin: 4, sizeMax: 10, gravity: 0.0003 });
   }
+  /**
+   * Enters the game-over state and plays the failure jingle.
+   * @returns {void}
+   */
   lose() {
     if (this.state === STATE.GAMEOVER) return;
     this.state = STATE.GAMEOVER;
@@ -1749,6 +2495,12 @@ class Game {
   }
 
   /* ---- rendering ---- */
+  /**
+   * Renders one frame: sets up the DPR + letterbox transform, applies screen
+   * shake, clips to the world, then draws the active screen (menu/world+HUD)
+   * and any overlay (pause/shop/game-over/victory).
+   * @returns {void}
+   */
   draw() {
     const ctx = this.ctx;
     safe(() => {
@@ -1780,6 +2532,11 @@ class Game {
     }, "draw");
   }
 
+  /**
+   * Draws the parallax sky/scenery background for the current level.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawBackground(ctx) {
     const L = this.level;
     if (L === 1) {
@@ -1822,6 +2579,11 @@ class Game {
       }
     }
   }
+  /**
+   * Draws the ground band, lava pools and any danger-zone overlay.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawGround(ctx) {
     const L = this.level;
     if (L === 1) ctx.fillStyle = "#6b8e23";
@@ -1862,6 +2624,13 @@ class Game {
       ctx.lineTo(this.goalX + 4, this.groundY - 60); ctx.fill();
     }
   }
+  /**
+   * Draws the full gameplay scene: background, ground, platforms, coins,
+   * enemies, boss, projectiles, hazards, the player, particles and the
+   * floating combo indicator.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawWorld(ctx) {
     this.drawBackground(ctx);
     this.drawGround(ctx);
@@ -1884,6 +2653,11 @@ class Game {
       ctx.restore();
     }
   }
+  /**
+   * Draws the live combo multiplier floating above the player.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawComboOverPlayer(ctx) {
     if (!this.combo || this.combo.streak < 2 || !this.player) return;
     const pl = this.player;
@@ -1901,6 +2675,15 @@ class Game {
   }
 
   /* ---- HUD ---- */
+  /**
+   * Draws a single heart icon (filled or empty) for the health display.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @param {number} x - Top-left X.
+   * @param {number} y - Top-left Y.
+   * @param {number} s - Icon size in px.
+   * @param {boolean} filled - Whether the heart is filled (health remaining).
+   * @returns {void}
+   */
   drawHeart(ctx, x, y, s, filled) {
     ctx.save();
     ctx.translate(x, y);
@@ -1914,6 +2697,12 @@ class Game {
     ctx.fill();
     ctx.restore();
   }
+  /**
+   * Draws the heads-up display: hearts, coins, score, combo, level/timer, the
+   * boss health bar and the on-canvas touch buttons.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawHUD(ctx) {
     const pl = this.player;
     // hearts top-left
@@ -1992,6 +2781,13 @@ class Game {
     ctx.fillText("[P] Pause", WORLD_W - 20, WORLD_H - 14);
   }
 
+  /**
+   * Renders the translucent on-canvas D-pad / action buttons, highlighting any
+   * that are currently held.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   * @mobile
+   */
   drawTouchButtons(ctx) {
     if (!this.showTouch) return;
     const btns = this.touchBtns;
@@ -2011,6 +2807,11 @@ class Game {
   }
 
   /* ---- screens ---- */
+  /**
+   * Draws the main menu (title, chicken doodle, start button, stats, controls).
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawMenu(ctx) {
     const g = ctx.createLinearGradient(0, 0, 0, WORLD_H);
     g.addColorStop(0, "#ffb347"); g.addColorStop(1, "#cc5500");
@@ -2033,6 +2834,17 @@ class Game {
     ctx.fillText("WASD / Pfeile = Bewegen  •  W/↑/Leer = Springen  •  Shift = Dash  •  P = Pause", WORLD_W / 2, 600);
     ctx.fillText("Sammle Münzen, baue Combos, kaufe Upgrades, besiege EL DIABLO POLLO!", WORLD_W / 2, 624);
   }
+  /**
+   * Draws a clickable UI button and registers its hit area for the frame.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @param {string} label - Button text.
+   * @param {number} cx - Center X.
+   * @param {number} cy - Center Y.
+   * @param {number} w - Width.
+   * @param {number} h - Height.
+   * @param {string} id - Button id passed to {@link Game#onButton}.
+   * @returns {void}
+   */
   drawButton(ctx, label, cx, cy, w, h, id) {
     const b = { x: cx - w / 2, y: cy - h / 2, w, h, id };
     this.buttons.push(b);
@@ -2043,6 +2855,11 @@ class Game {
     ctx.fillText(label, cx, cy);
     ctx.textBaseline = "alphabetic";
   }
+  /**
+   * Draws the pause overlay and its resume/menu buttons.
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawPause(ctx) {
     ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, WORLD_W, WORLD_H);
     ctx.fillStyle = "#fff"; ctx.font = "bold 56px sans-serif"; ctx.textAlign = "center";
@@ -2050,6 +2867,12 @@ class Game {
     this.drawButton(ctx, "WEITER", WORLD_W / 2, 360, 220, 56, "resume");
     this.drawButton(ctx, "MENÜ", WORLD_W / 2, 440, 220, 56, "quit");
   }
+  /**
+   * Draws the between-levels upgrade shop (purchasable upgrades, prices, owned
+   * state, current coins and the continue button).
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawShop(ctx) {
     this.drawWorld(ctx);
     ctx.fillStyle = "rgba(0,0,0,0.78)"; ctx.fillRect(0, 0, WORLD_W, WORLD_H);
@@ -2081,6 +2904,16 @@ class Game {
     });
     this.drawButton(ctx, "NÄCHSTES LEVEL →", WORLD_W / 2, WORLD_H - 60, 360, 56, "next");
   }
+  /**
+   * Word-wraps and draws multi-line text within a maximum width.
+   * @param {CanvasRenderingContext2D} ctx - The drawing context.
+   * @param {string} text - The text to wrap.
+   * @param {number} x - Start X.
+   * @param {number} y - Baseline Y of the first line.
+   * @param {number} maxW - Maximum line width in px.
+   * @param {number} lh - Line height in px.
+   * @returns {number} The Y position after the last drawn line.
+   */
   wrapText(ctx, text, x, y, maxW, lh) {
     const words = text.split(" "); let line = "", yy = y;
     for (const w of words) {
@@ -2090,6 +2923,11 @@ class Game {
     }
     ctx.fillText(line, x, yy);
   }
+  /**
+   * Draws the game-over panel (animated intro, final score, restart/menu).
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawGameOver(ctx) {
     const t = clamp((this._panelT || 0), 0, 1);
     ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillRect(0, 0, WORLD_W, WORLD_H);
@@ -2106,6 +2944,11 @@ class Game {
     this.drawButton(ctx, "NOCHMAL", WORLD_W / 2, 500, 240, 56, "restart");
     this.drawButton(ctx, "MENÜ", WORLD_W / 2, 575, 240, 56, "quit");
   }
+  /**
+   * Draws the victory panel (animated intro, final score/high score, buttons).
+   * @param {CanvasRenderingContext2D} ctx - The world-space drawing context.
+   * @returns {void}
+   */
   drawVictory(ctx) {
     ctx.fillStyle = "rgba(10,0,20,0.8)"; ctx.fillRect(0, 0, WORLD_W, WORLD_H);
     this.particles.draw(ctx);
@@ -2121,6 +2964,14 @@ class Game {
   }
 
   /* ---- UI input ---- */
+  /**
+   * Wires mouse/keyboard UI input: maps clicks to on-screen buttons (hit-tested
+   * in world space), click-to-jump during play, and keyboard shortcuts for
+   * pause and screen transitions.
+   * @returns {void}
+   * @listens HTMLElement#mousedown
+   * @listens Window#keydown
+   */
   bindUI() {
     const handler = (cx, cy) => {
       Audio.resume();
@@ -2154,6 +3005,12 @@ class Game {
       }
     });
   }
+  /**
+   * Handles a UI button action by id (start, resume, quit, restart, shop
+   * purchases, next level, …).
+   * @param {string} id - The button identifier.
+   * @returns {void}
+   */
   onButton(id) {
     safe(() => Audio.buy(), "btn");
     if (id === "start") { this.runCoins = 0; this.score = 0; this.player = new Player(this); this.startLevel(1); }
@@ -2177,6 +3034,18 @@ class Game {
   }
 
   /* ---- touch ---- */
+  /**
+   * Initializes the multi-touch control system: detects touch capability, lays
+   * out the buttons, and registers passive-false touch listeners that map every
+   * active touch point onto the left/right/jump/dash intents (true multi-touch,
+   * e.g. run + jump simultaneously) while also routing menu taps.
+   * @returns {void}
+   * @listens HTMLElement#touchstart
+   * @listens HTMLElement#touchmove
+   * @listens HTMLElement#touchend
+   * @listens HTMLElement#touchcancel
+   * @mobile
+   */
   setupTouch() {
     this.showTouch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
     this.touchBtns = [];
@@ -2219,6 +3088,13 @@ class Game {
     this.canvas.addEventListener("touchend", onTouch, { passive: false });
     this.canvas.addEventListener("touchcancel", onTouch, { passive: false });
   }
+  /**
+   * (Re)computes the on-canvas touch button positions in virtual-world space:
+   * left/right at bottom-left, jump/dash at bottom-right. Because they live in
+   * world space they scale automatically with the letterbox transform.
+   * @returns {void}
+   * @mobile
+   */
   layoutTouch() {
     const r = 48;
     const by = WORLD_H - 90;
@@ -2231,6 +3107,151 @@ class Game {
   }
 }
 
+/* =========================================================================
+ * @module MobileExperienceLayer
+ * @description
+ * App-like mobile polish bolted onto the canvas engine: a forced-landscape
+ * rotation gate, a Page-Visibility auto-pause, and an audio suspend/resume on
+ * tab switches. Pure additive layer — it only flips {@link Game#state} between
+ * PLAYING and PAUSED and toggles the HTML overlay, never touching gameplay.
+ * The existing on-canvas touch buttons (see {@link Game#setupTouch}) already
+ * provide multi-touch D-pad input, so this layer focuses on orientation,
+ * visibility and audio lifecycle.
+ * ========================================================================= */
+
+/**
+ * @class MobileGate
+ * @classdesc Watches device orientation and tab visibility, showing the
+ * rotation overlay and pausing the game in portrait / when hidden, and
+ * resuming automatically in landscape / when visible again.
+ * @mobile
+ * @property {Game} game - The game instance to pause/resume.
+ * @property {?HTMLElement} overlay - The rotation overlay element.
+ * @property {boolean} pausedByGate - True when *this* layer caused the current pause.
+ * @property {boolean} pausedByVisibility - True when a hidden tab caused the current pause.
+ */
+class MobileGate {
+  /**
+   * @param {Game} gameRef - The running {@link Game} instance.
+   * @constructor
+   * @mobile
+   */
+  constructor(gameRef) {
+    this.game = gameRef;
+    this.overlay = document.getElementById("rotateOverlay");
+    this.pausedByGate = false;
+    this.pausedByVisibility = false;
+    this.bind();
+    this.evaluate();
+  }
+
+  /**
+   * Whether the device is a coarse-pointer / touch device.
+   * @returns {boolean} True on touch-capable devices.
+   * @mobile
+   */
+  isTouch() { return ("ontouchstart" in window) || navigator.maxTouchPoints > 0; }
+
+  /**
+   * Detects portrait orientation via the Screen Orientation API, falling back
+   * to a viewport dimension comparison.
+   * @returns {boolean} True when held in portrait.
+   * @mobile
+   */
+  isPortrait() {
+    if (screen.orientation && screen.orientation.type) return screen.orientation.type.startsWith("portrait");
+    return window.innerHeight > window.innerWidth;
+  }
+
+  /**
+   * Attaches orientation, resize, visibility and audio-unlock listeners.
+   * @returns {void}
+   * @mobile
+   */
+  bind() {
+    const reeval = () => this.evaluate();
+    window.addEventListener("resize", reeval);
+    window.addEventListener("orientationchange", reeval);
+    if (screen.orientation && screen.orientation.addEventListener) {
+      screen.orientation.addEventListener("change", reeval);
+    }
+    document.addEventListener("visibilitychange", () => this.onVisibility());
+    if (this.overlay) this.overlay.addEventListener("pointerdown", () => safe(() => Audio.resume(), "gate.audio"));
+  }
+
+  /**
+   * Re-evaluates orientation and shows or hides the rotation gate accordingly.
+   * No-op visuals on desktop (the overlay never appears).
+   * @returns {void}
+   * @listens Window#orientationchange
+   * @listens Window#resize
+   * @mobile
+   */
+  evaluate() {
+    if (this.isTouch() && this.isPortrait()) this.showGate();
+    else this.hideGate();
+  }
+
+  /**
+   * Fades the rotation overlay in, pauses an in-progress game and clears all
+   * held input so the character cannot "stick".
+   * @returns {void}
+   * @mobile
+   */
+  showGate() {
+    if (!this.overlay) return;
+    this.overlay.classList.add("is-visible");
+    this.overlay.setAttribute("aria-hidden", "false");
+    if (this.game.state === STATE.PLAYING) { this.game.state = STATE.PAUSED; this.pausedByGate = true; }
+    this.clearInput();
+  }
+
+  /**
+   * Fades the rotation overlay out and resumes the game if this layer paused it.
+   * @returns {void}
+   * @mobile
+   */
+  hideGate() {
+    if (!this.overlay) return;
+    this.overlay.classList.remove("is-visible");
+    this.overlay.setAttribute("aria-hidden", "true");
+    if (this.pausedByGate && this.game.state === STATE.PAUSED) this.game.state = STATE.PLAYING;
+    this.pausedByGate = false;
+  }
+
+  /**
+   * Page Visibility handler: pauses gameplay and suspends audio when the tab is
+   * hidden, and resumes when it returns to the foreground (unless still gated
+   * in portrait).
+   * @returns {void}
+   * @listens Document#visibilitychange
+   * @mobile
+   */
+  onVisibility() {
+    if (document.hidden) {
+      if (this.game.state === STATE.PLAYING) { this.game.state = STATE.PAUSED; this.pausedByVisibility = true; }
+      this.clearInput();
+      safe(() => Audio.ctx && Audio.ctx.suspend(), "gate.suspend");
+    } else {
+      safe(() => Audio.resume(), "gate.resume");
+      if (this.pausedByVisibility && !(this.isTouch() && this.isPortrait()) && this.game.state === STATE.PAUSED) {
+        this.game.state = STATE.PLAYING;
+      }
+      this.pausedByVisibility = false;
+    }
+  }
+
+  /**
+   * Clears every held keyboard and touch flag.
+   * @returns {void}
+   * @mobile
+   */
+  clearInput() {
+    Input.keys = {};
+    Input._tLeft = Input._tRight = Input._tJump = Input._tDash = false;
+  }
+}
+
 /* ----------------------------- Bootstrap -------------------------------- */
 const canvas = document.getElementById("game");
 const game = new Game(canvas);
@@ -2239,8 +3260,24 @@ game.resize();
 window.addEventListener("resize", () => safe(() => { game.resize(); game.layoutTouch(); }, "onresize"));
 window.addEventListener("orientationchange", () => safe(() => { game.resize(); game.layoutTouch(); }, "onorient"));
 
+/**
+ * The mobile experience layer instance (rotation gate + visibility pause).
+ * @type {MobileGate}
+ * @mobile
+ */
+const mobileGate = new MobileGate(game);
+
 let last = performance.now();
+
+/**
+ * Main animation-frame loop. Skips simulation while the tab is hidden (the
+ * Page Visibility guard) so no work is wasted and time does not jump on return,
+ * then advances and renders the game with a capped delta.
+ * @param {DOMHighResTimeStamp} now - The timestamp supplied by requestAnimationFrame.
+ * @returns {void}
+ */
 function loop(now) {
+  if (document.hidden) { last = now; requestAnimationFrame(loop); return; }
   let dt = now - last;
   last = now;
   if (dt > DT_CAP) dt = DT_CAP;     // cap delta
@@ -2259,6 +3296,7 @@ requestAnimationFrame(loop);
 
 // expose for debugging
 window.__eplGame = game;
+window.__eplMobileGate = mobileGate;
 
 })();
 </script>
