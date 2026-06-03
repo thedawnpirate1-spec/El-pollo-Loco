@@ -1326,8 +1326,7 @@ class Boss {
     } else if (p === 3) {
       this.transitionMsg = "¡AHORA MUERES!";
       this.transitionTime = 2000; this.stateTimer = 2000;
-      this.applyScale(3.5 / 3); // grow from 3x baseline... actually scale baseline is 1 (=3x player). Use 1.17 -> represents extra growth
-      this.applyScale(1.17);
+      this.applyScale(1.17); // FIX: removed redundant first applyScale(3.5/3) — applyScale sets absolute scale, so it was immediately overwritten
       Shake.add(2000, 9);
       safe(() => Audio.bpmMul = 1.8, "boss.bpm3");
       this.game.freeze = 800;
@@ -1938,7 +1937,7 @@ class Combo {
    * @returns {void}
    */
   add() {
-    const prevMult = this.multiplier;
+    // FIX: removed unused `const prevMult = this.multiplier;` dead variable
     this.streak++;
     this.timer = this.window;
     safe(() => Audio.combo(), "combo");
@@ -2363,7 +2362,7 @@ class Game {
       } else if (hz instanceof FirePatch) {
         if (aabb({ x: hz.x, y: hz.y - 10, w: hz.w, h: hz.h + 10 }, pl) && pl.invuln <= 0) pl.takeHit(1);
       } else if (hz instanceof LavaBubble || hz instanceof Meteor) {
-        if (hz.active !== false && !hz.warn > 0) {}
+        // FIX: removed dead no-op `if (hz.active !== false && !hz.warn > 0) {}` (empty body + broken `!x > 0` precedence)
         const hb = { x: hz.bx, y: hz.by, w: hz.w, h: hz.h };
         if ((hz.warn === undefined || hz.warn <= 0) && aabb(hb, pl) && pl.invuln <= 0) pl.takeHit(1);
       }
